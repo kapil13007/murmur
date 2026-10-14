@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; media-src 'self' blob: mediastream:"
+    />
+    <title>Flow Bar</title>
+    <link rel="stylesheet" href="flowbar.css" />
+  </head>
+  <body>
+    <main id="stage" class="stage bottom">
+      <div id="bubble" class="bubble" role="status" aria-live="polite" hidden>
+        <span id="bubble-icon" class="bubble-icon" aria-hidden="true"></span>
+        <span id="bubble-text"></span>
+      </div>
+
+      <div id="pill" class="pill idle" data-mode="">
+        <button id="cancel" class="pill-btn cancel" type="button" title="Cancel (Esc)" aria-label="Cancel dictation">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 4.5l7 7m0-7l-7 7" /></svg>
+        </button>
+        <canvas id="wave" class="wave" aria-hidden="true"></canvas>
+        <span id="status-icon" class="status-icon" aria-hidden="true"></span>
+        <button id="stop" class="pill-btn stop" type="button" title="Finish dictation" aria-label="Finish dictation">
+          <span></span>
+        </button>
+      </div>
+    </main>
+    <script src="flowbar.js"></script>
+  </body>
+</html>

@@ -1,0 +1,54 @@
+# docker-compose.yml
+# PostgreSQL + the Whisper Flow API (which also serves the hub UI).
+#
+#   cp .env.example .env      # then set SECRET_KEY and POSTGRES_PASSWORD
+#   docker compose up --build
+#   docker compose exec api node scripts/seed.js   # optional demo account
+#
+# Open http://localhost:8000 (or the port set in API_PORT).
+services:
+  db:
+    image: postgres:18
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: whisper_flow_app
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: whisper_flow
+    volumes:
+      # PostgreSQL 18 images keep their data under /var/lib/postgresql/18
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U whisper_flow_app -d whisper_flow']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    # No published port: only the API talks to the database.
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+      args:
+        PRELOAD_MODEL: ${PRELOAD_MODEL:-true}
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 8000
+      DATABASE_URL: postgres://whisper_flow_app:${POSTGRES_PASSWORD}@db:5432/whisper_flow
+      SECRET_KEY: ${SECRET_KEY:?Set SECRET_KEY in .env}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8000}
+      SERVE_FRONTEND: 'true'
+      ASR_PROVIDER: ${ASR_PROVIDER:-local}
+      LLM_PROVIDER: ${LLM_PROVIDER:-none}
+      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-claude-opus-5-5}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    ports:
+      - '${API_PORT:-8000}:8000'
+
+volumes:
+  pgdata:

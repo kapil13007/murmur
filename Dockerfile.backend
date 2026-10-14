@@ -1,0 +1,38 @@
+# Dockerfile.backend
+# One image that serves both the API and the hub UI (SERVE_FRONTEND=true).
+
+# --- Stage 1: build the hub UI (React + Vite) ---
+FROM node:24-slim AS frontend
+WORKDIR /app/frontend
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm ci
+COPY frontend .
+RUN npm run build
+
+# --- Stage 2: the Express API ---
+FROM node:24-slim
+ENV NODE_ENV=production
+
+# Run as the unprivileged user that ships with the Node image
+WORKDIR /app/backend
+RUN chown node:node /app/backend
+USER node
+
+# Install dependencies
+COPY --chown=node:node backend/package.json backend/package-lock.json ./
+RUN npm ci --omit=dev
+
+# Copy backend source code and the built UI (served from ../frontend/dist)
+COPY --chown=node:node backend .
+COPY --from=frontend /app/frontend/dist /app/frontend/dist
+
+# Bake the local Whisper model into the image so the first dictation is fast.
+# Skip it (e.g. when using ASR_PROVIDER=groq) with --build-arg PRELOAD_MODEL=false
+ARG PRELOAD_MODEL=true
+RUN if [ "$PRELOAD_MODEL" = "true" ]; then node scripts/download_model.js; fi
+
+# Expose the port Express listens on
+EXPOSE 8000
+
+# Applies pending migrations on boot, then serves the API + UI
+CMD ["node", "server.js"]

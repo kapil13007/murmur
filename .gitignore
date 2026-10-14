@@ -1,0 +1,36 @@
+# --- General ---
+# Ignore IDE and editor-specific files
+.vscode/
+.idea/
+
+# Ignore OS-generated files
+.DS_Store
+Thumbs.db
+
+# Ignore logs
+*.log
+npm-debug.log*
+
+# --- Secrets ---
+# Ignore all environment files except the example templates
+.env
+.env.*
+!.env.example
+
+# --- Dependencies ---
+node_modules/
+
+# --- Frontend (Vite + React) ---
+# Ignore build output and the Vite cache
+frontend/dist/
+frontend/.vite/
+
+# --- Backend (Node.js + Express) ---
+# Downloaded Whisper model weights (re-created by `npm run model:download`)
+backend/.model-cache/
+backend/coverage/
+
+# --- Desktop (Electron) ---
+# Installer output and the compiled native helper (built on `npm install`)
+desktop/dist/
+desktop/helper/bin/

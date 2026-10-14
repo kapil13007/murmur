@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src http: https:"
+    />
+    <title>Whisper Flow</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #faf9f7;
+        --panel: #ffffff;
+        --ink: #1a1a1a;
+        --muted: #6b6862;
+        --line: #e8e5df;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #141414;
+          --panel: #1c1c1c;
+          --ink: #f4f2ee;
+          --muted: #a29e96;
+          --line: #2c2c2c;
+        }
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: var(--bg);
+        color: var(--ink);
+        font: 15px/1.5 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif;
+      }
+      .card {
+        max-width: 460px;
+        margin: 24px;
+        padding: 32px;
+        border-radius: 20px;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        text-align: center;
+      }
+      svg {
+        width: 48px;
+        height: 48px;
+      }
+      h1 {
+        margin: 16px 0 8px;
+        font-size: 20px;
+        font-weight: 600;
+      }
+      p {
+        margin: 0 0 12px;
+        color: var(--muted);
+      }
+      code {
+        padding: 2px 6px;
+        border-radius: 6px;
+        background: var(--line);
+        color: var(--ink);
+        font-size: 13px;
+      }
+      button {
+        margin-top: 8px;
+        padding: 9px 18px;
+        border: 0;
+        border-radius: 999px;
+        background: var(--ink);
+        color: var(--bg);
+        font: inherit;
+        font-weight: 600;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+        <rect width="64" height="64" rx="16" fill="#1a1a1a" />
+        <rect x="13" y="26" width="6" height="12" rx="3" fill="#f0d7ff" />
+        <rect x="23" y="18" width="6" height="28" rx="3" fill="#fcfcfb" />
+        <rect x="33" y="12" width="6" height="40" rx="3" fill="#fcfcfb" />
+        <rect x="43" y="22" width="6" height="20" rx="3" fill="#84cdc1" />
+      </svg>
+      <h1>Can't reach Whisper Flow</h1>
+      <p>The hub is served by the backend at <code id="url">http://localhost:8000</code>.</p>
+      <p>Start it with <code>npm run dev</code> in the <code>backend</code> folder. This page reconnects by itself.</p>
+      <p id="status" aria-live="polite">Retrying…</p>
+      <button id="retry" type="button">Try again now</button>
+    </main>
+    <script src="offline.js"></script>
+  </body>
+</html>

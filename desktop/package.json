@@ -1,0 +1,53 @@
+{
+  "name": "prem-whisper-flow-desktop",
+  "productName": "Whisper Flow",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Whisper Flow desktop app: global push-to-talk dictation into any app",
+  "author": "Prem",
+  "main": "main/index.js",
+  "scripts": {
+    "start": "node scripts/start.js",
+    "dev": "cross-env HUB_URL=http://localhost:5173 node scripts/start.js",
+    "build:helper": "node helper/build.js",
+    "icons": "node scripts/make-icons.js",
+    "postinstall": "node helper/build.js",
+    "dist": "npm run build:helper && electron-builder --win"
+  },
+  "build": {
+    "appId": "com.prem.whisperflow",
+    "productName": "Whisper Flow",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main/**",
+      "preload/**",
+      "renderer/**",
+      "assets/**",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "helper/bin/FlowHelper.exe",
+        "to": "FlowHelper.exe"
+      }
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  },
+  "devDependencies": {
+    "cross-env": "^10.1.0",
+    "electron": "^44.7.2",
+    "electron-builder": "^26.15.3"
+  }
+}

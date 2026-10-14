@@ -1,0 +1,42 @@
+# --------------------
+# General
+# --------------------
+.git
+.gitignore
+.github
+*.log
+.DS_Store
+Thumbs.db
+README.md
+DOCUMENTATION.md
+LICENSE
+
+# --------------------
+# Secrets
+# --------------------
+**/.env
+**/.env.*
+!**/.env.example
+
+# --------------------
+# Node (all packages)
+# --------------------
+**/node_modules
+**/coverage
+
+# --------------------
+# Backend
+# --------------------
+backend/.model-cache
+backend/tests
+
+# --------------------
+# Frontend (built inside the image)
+# --------------------
+frontend/dist
+frontend/.vite
+
+# --------------------
+# Desktop app (Windows-only, not part of the server image)
+# --------------------
+desktop
