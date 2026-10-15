@@ -50,7 +50,7 @@ export default function DictationCard({ onDictated }) {
       try {
         const res = await transcribeAudio(recording.blob, {
           mode: 'web',
-          app_name: 'Whisper Flow Hub',
+          app_name: 'Murmur',
           timezone_offset_minutes: -new Date().getTimezoneOffset(),
         });
         if (res.status !== 'success') toast(res.message || 'No speech detected');

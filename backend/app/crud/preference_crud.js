@@ -16,7 +16,6 @@ export const DEFAULT_NOTIFICATION_SETTINGS = Object.freeze({
   tips_and_suggestions: true,
   feature_highlights: true,
   milestones_and_progress: true,
-  team_updates: true,
 });
 
 export function createPreferences(userId, overrides = {}, options = {}) {

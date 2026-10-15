@@ -48,7 +48,7 @@ apiClient.interceptors.response.use(
 export function errorMessage(error, fallback = 'Something went wrong. Please try again.') {
   const detail = error?.response?.data?.detail;
   if (typeof detail === 'string') return detail;
-  if (error?.message === 'Network Error') return "Can't reach the Whisper Flow server. Is the backend running?";
+  if (error?.message === 'Network Error') return "Can't reach the Murmur server. Is the backend running?";
   return fallback;
 }
 
@@ -119,11 +119,8 @@ export const deleteTranscript = (id) => apiClient.delete(`/history/${id}`);
 export const retryTranscript = (id) => data(apiClient.post(`/history/${id}/retry`));
 export const getTranscriptAudio = (id) => data(apiClient.get(`/history/${id}/audio`, { responseType: 'blob' }));
 
-// --- Stats / Insights ---
+// --- Stats ---
 export const getStatsSummary = () => data(apiClient.get('/stats/summary'));
-export const getHeatmap = (days = 371) => data(apiClient.get('/stats/heatmap', { params: { days } }));
-export const getTopApps = () => data(apiClient.get('/stats/apps'));
-export const getWeeklyUsage = () => data(apiClient.get('/stats/usage'));
 
 // --- Dictionary & Snippets (same API shape, different collection) ---
 const entryApi = (base) => ({
@@ -132,8 +129,6 @@ const entryApi = (base) => ({
   update: (id, changes) => data(apiClient.put(`${base}/${id}`, changes)),
   remove: (id) => apiClient.delete(`${base}/${id}`),
   bulkDelete: (ids) => data(apiClient.post(`${base}/bulk-delete`, { ids })),
-  share: (ids) => data(apiClient.post(`${base}/share`, { ids })),
-  unshare: (ids) => data(apiClient.post(`${base}/unshare`, { ids })),
   importText: (text) => data(apiClient.post(`${base}/import`, { text })),
 });
 export const dictionaryApi = entryApi('/dictionary');
@@ -142,16 +137,6 @@ export const snippetsApi = entryApi('/snippets');
 // --- Style ---
 export const getStyles = () => data(apiClient.get('/styles'));
 export const updateStyle = (category, changes) => data(apiClient.put(`/styles/${category}`, changes));
-
-// --- Notes (Scratchpad) ---
-export const getNotes = (params) => data(apiClient.get('/notes', { params }));
-export const getNote = (id) => data(apiClient.get(`/notes/${id}`));
-export const createNote = (payload) => data(apiClient.post('/notes', payload));
-export const updateNote = (id, changes) => data(apiClient.patch(`/notes/${id}`, changes));
-export const deleteNote = (id) => apiClient.delete(`/notes/${id}`);
-export const getNoteVersions = (id) => data(apiClient.get(`/notes/${id}/versions`));
-export const restoreNoteVersion = (id, versionId) => data(apiClient.post(`/notes/${id}/versions/${versionId}/restore`));
-export const transformNote = (id, payload) => data(apiClient.post(`/notes/${id}/transform`, payload));
 
 // --- Transforms ---
 export const getTransforms = () => data(apiClient.get('/transforms'));
@@ -168,33 +153,6 @@ export const markNotificationRead = (id) => data(apiClient.post(`/notifications/
 export const archiveNotification = (id) => data(apiClient.post(`/notifications/${id}/archive`));
 export const markAllNotificationsRead = () => apiClient.post('/notifications/read-all');
 export const archiveAllNotifications = () => apiClient.post('/notifications/archive-all');
-
-// --- Plans & Billing ---
-export const getPlans = () => data(apiClient.get('/billing/plans'));
-export const getSubscription = () => data(apiClient.get('/billing/subscription'));
-export const getBillingHistory = () => data(apiClient.get('/billing/history'));
-export const checkout = (payload) => data(apiClient.post('/billing/checkout', payload));
-export const cancelSubscription = () => data(apiClient.post('/billing/cancel'));
-export const resumeSubscription = () => data(apiClient.post('/billing/resume'));
-export const claimStudentPlan = () => data(apiClient.post('/billing/student'));
-
-// --- Team ---
-export const getMyTeam = () => data(apiClient.get('/teams/me'));
-export const createTeam = (name) => data(apiClient.post('/teams', { name }));
-export const renameTeam = (name) => data(apiClient.patch('/teams', { name }));
-export const inviteToTeam = (emails) => data(apiClient.post('/teams/invite', { emails }));
-export const joinTeam = (inviteCode) => data(apiClient.post('/teams/join', { invite_code: inviteCode }));
-export const leaveTeam = () => data(apiClient.post('/teams/leave'));
-export const regenerateInviteCode = () => data(apiClient.post('/teams/invite-code/regenerate'));
-export const acceptInvitation = (id) => data(apiClient.post(`/teams/invitations/${id}/accept`));
-export const declineInvitation = (id) => data(apiClient.post(`/teams/invitations/${id}/decline`));
-export const revokeInvitation = (id) => data(apiClient.delete(`/teams/invitations/${id}`));
-export const setMemberRole = (userId, role) => data(apiClient.patch(`/teams/members/${userId}`, { role }));
-export const removeMember = (userId) => data(apiClient.delete(`/teams/members/${userId}`));
-
-// --- Referrals ---
-export const getReferrals = () => data(apiClient.get('/referrals'));
-export const inviteReferral = (email) => data(apiClient.post('/referrals/invite', { email }));
 
 // --- Data & Privacy ---
 export const exportData = () => data(apiClient.get('/data/export'));

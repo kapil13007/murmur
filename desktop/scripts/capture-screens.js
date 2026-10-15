@@ -13,7 +13,7 @@ const API = `${process.env.API_URL || 'http://localhost:8000'}/api/v1`;
 const arg = (name, fallback) => process.argv.find((a) => a.startsWith(`--${name}=`))?.split('=')[1] || fallback;
 const OUT = path.resolve(arg('out', path.join(__dirname, '..', '..', 'docs', 'screenshots')));
 const THEME = arg('theme', 'light');
-const EMAIL = process.env.DEMO_EMAIL || 'demo@whisperflow.local';
+const EMAIL = process.env.DEMO_EMAIL || 'demo@murmur.local';
 const PASSWORD = process.env.DEMO_PASSWORD || 'Demo12345';
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -41,7 +41,6 @@ app.whenReady().then(async () => {
   });
   const prefs = await api('/preferences', token);
   if (prefs.theme !== THEME) await api('/preferences', token, { method: 'PATCH', body: JSON.stringify({ theme: THEME }) });
-  const notes = await api('/notes', token);
 
   // Offscreen rendering keeps painting frames without showing a window, so
   // capturePage() always gets the current UI (a hidden window would not repaint).
@@ -64,16 +63,11 @@ app.whenReady().then(async () => {
     ['03-dictionary', '/dictionary'],
     ['04-snippets', '/snippets'],
     ['05-style', '/style'],
-    ['06-scratchpad', '/notes'],
-    ['07-note-editor', notes[0] ? `/notes/${notes[0].id}` : '/notes'],
-    ['08-transforms', '/transforms'],
-    ['09-insights', '/insights'],
-    ['10-referral', '/referral'],
-    ['11-settings-general', '/settings/general'],
-    ['12-settings-system', '/settings/system'],
-    ['13-settings-plans', '/settings/plans'],
-    ['14-settings-team', '/settings/team'],
-    ['15-settings-privacy', '/settings/privacy'],
+    ['06-transforms', '/transforms'],
+    ['07-settings-general', '/settings/general'],
+    ['08-settings-system', '/settings/system'],
+    ['09-settings-account', '/settings/account'],
+    ['10-settings-privacy', '/settings/privacy'],
   ];
   for (const [name, route] of pages) {
     await visit(route);

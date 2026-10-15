@@ -32,7 +32,7 @@ export default function LanguagesDialog({ onClose }) {
       isOpen
       onClose={onClose}
       title="Dictation languages"
-      subtitle="Pick one language for the best accuracy. With several (or none), Flow detects the language each time you speak."
+      subtitle="Pick one language for the best accuracy. With several (or none), Murmur detects the language each time you speak."
       size="lg"
     >
       <SearchInput value={query} onChange={setQuery} placeholder="Search language" />

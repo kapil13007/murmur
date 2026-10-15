@@ -32,7 +32,7 @@ export async function complete({ system, user, effort = 'low', maxTokens }) {
   if (provider === 'anthropic') {
     result = await completeWithAnthropic({ system, user, effort, maxTokens });
   } else if (provider === 'openai' || provider === 'groq') {
-    result = await completeWithOpenAICompatible(provider, { system, user, maxTokens });
+    result = await completeWithOpenAICompatible(provider, { system, user, maxTokens, effort });
   } else {
     throw new LlmUnavailableError('No AI provider is configured', { provider: 'none' });
   }

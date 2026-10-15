@@ -10,7 +10,7 @@ import { useApp } from '../context/AppContext';
 import { useRecorder } from '../hooks/useRecorder';
 import Waveform from './ui/Waveform';
 
-export default function DictateButton({ onText, appName = 'Scratchpad', compact = false }) {
+export default function DictateButton({ onText, appName = 'Murmur', compact = false }) {
   const { preferences } = useApp();
   const recorder = useRecorder({ deviceId: preferences?.microphone_device_id || undefined });
   const [busy, setBusy] = useState(false);

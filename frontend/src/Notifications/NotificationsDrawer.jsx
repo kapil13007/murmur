@@ -19,9 +19,6 @@ import Spinner from '../components/ui/Spinner';
 const TYPE_DOT = {
   milestone: 'bg-glow-300',
   learning: 'bg-fathom-500',
-  team: 'bg-dawn-700',
-  usage: 'bg-flare-400',
-  billing: 'bg-chord-500',
   tip: 'bg-signal-500',
   feature: 'bg-fathom-800',
   system: 'bg-vast-400',
@@ -101,7 +98,7 @@ export default function NotificationsDrawer({ onClose }) {
             <Spinner className="p-4" />
           ) : !items.length ? (
             <div className="p-3">
-              <EmptyState icon={Bell} title="You're all caught up" body="Milestones, tips and team updates show up here." />
+              <EmptyState icon={Bell} title="You're all caught up" body="Milestones, tips and newly learned words show up here." />
             </div>
           ) : (
             items.map((n) => (

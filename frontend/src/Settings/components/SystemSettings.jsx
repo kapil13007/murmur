@@ -23,7 +23,7 @@ export default function SystemSettings() {
     <div>
       <SettingSection title="App settings">
         <PrefToggle prefs={prefs} save={save} field="open_at_login" label="Launch app at login" description={desktopOnly} />
-        <PrefToggle prefs={prefs} save={save} field="show_flow_bar" label="Show Flow Bar at all times" description={desktopOnly || 'When off, the bar only appears while you dictate.'} />
+        <PrefToggle prefs={prefs} save={save} field="show_flow_bar" label="Show the Murmur bar at all times" description={desktopOnly || 'When off, the bar only appears while you dictate.'} />
         <PrefToggle prefs={prefs} save={save} field="show_in_taskbar" label="Show app in taskbar" description={desktopOnly} />
       </SettingSection>
 
@@ -52,17 +52,14 @@ export default function SystemSettings() {
       </SettingSection>
 
       <SettingSection title="Notifications">
-        <SettingRow label="Suggestions" description="Tips about getting set up or improving how you use Flow.">
+        <SettingRow label="Suggestions" description="Tips about getting set up or improving how you use Murmur.">
           <NotifToggle value={notif.tips_and_suggestions} onChange={(v) => setNotif('tips_and_suggestions', v)} />
         </SettingRow>
         <SettingRow label="Announcements" description="New features or capabilities">
           <NotifToggle value={notif.feature_highlights} onChange={(v) => setNotif('feature_highlights', v)} />
         </SettingRow>
-        <SettingRow label="Milestones" description="Word-count milestones, streaks, and referral activity">
+        <SettingRow label="Milestones" description="Word-count milestones and streaks">
           <NotifToggle value={notif.milestones_and_progress} onChange={(v) => setNotif('milestones_and_progress', v)} />
-        </SettingRow>
-        <SettingRow label="Team updates" description="Team invitations, join requests, and other team activity">
-          <NotifToggle value={notif.team_updates} onChange={(v) => setNotif('team_updates', v)} />
         </SettingRow>
       </SettingSection>
 

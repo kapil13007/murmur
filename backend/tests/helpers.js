@@ -19,8 +19,13 @@ function testDatabaseUrl() {
 
 process.env.NODE_ENV = 'test';
 process.env.DATABASE_URL = testDatabaseUrl();
-process.env.PRO_TRIAL_DAYS = process.env.PRO_TRIAL_DAYS || '14';
 process.env.SERVE_FRONTEND = 'false';
+// Tests are offline and deterministic: local Whisper and the rule engine,
+// whatever backend/.env selects. TEST_USE_PROVIDERS=1 uses the real ones.
+if (!process.env.TEST_USE_PROVIDERS) {
+  process.env.ASR_PROVIDER = 'local';
+  process.env.LLM_PROVIDER = 'none';
+}
 
 const { app } = await import('../app/main.js');
 const { sequelize } = await import('../app/db/session.js');

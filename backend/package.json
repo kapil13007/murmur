@@ -1,8 +1,8 @@
 {
-  "name": "prem-whisper-flow-backend",
+  "name": "prem-murmur-backend",
   "version": "1.0.0",
   "private": true,
-  "description": "Express + PostgreSQL API for the Whisper Flow voice dictation clone",
+  "description": "Express + PostgreSQL API for Murmur, a personal voice dictation app",
   "type": "module",
   "main": "server.js",
   "engines": {

@@ -19,7 +19,7 @@ export default function Playground({ transforms, onRun }) {
     if (!text.trim()) return;
     setBusy(key);
     try {
-      const res = await applyTransform({ text, ...payload, app_name: 'Whisper Flow Hub' });
+      const res = await applyTransform({ text, ...payload, app_name: 'Murmur' });
       setResult(res);
       if (res.status === 'no_changes') toast('No changes made');
       onRun();

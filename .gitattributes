@@ -1,0 +1,7 @@
+# Keep LF line endings in the repo and in every checkout (the linters and
+# shell scripts expect them), and never touch binary files.
+* text=auto eol=lf
+*.png binary
+*.ico binary
+*.wav binary
+*.exe binary

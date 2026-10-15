@@ -41,7 +41,7 @@ export default function LoginPage() {
       subtitle="Sign in to keep your dictionary, snippets and history in sync."
       footer={
         <>
-          New to Flow?{' '}
+          New to Murmur?{' '}
           <Link to="/register" className="font-semibold text-ink underline-offset-4 hover:underline">
             Create an account
           </Link>

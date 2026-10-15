@@ -165,7 +165,7 @@ export default function AccountSettings() {
             </div>
           ))
         ) : (
-          <p className="px-5 py-4 text-sm text-muted">No desktop devices yet. Sign in from the Whisper Flow desktop app to register one.</p>
+          <p className="px-5 py-4 text-sm text-muted">No desktop devices yet. Sign in from the Murmur desktop app to register one.</p>
         )}
       </SettingSection>
 
@@ -200,7 +200,7 @@ export default function AccountSettings() {
         onClose={() => setConfirmDelete(false)}
         confirmLabel="Delete my account"
         title="Delete your account?"
-        message="This permanently deletes your transcripts, dictionary, snippets, notes and settings. This can't be undone."
+        message="This permanently deletes your transcripts, dictionary, snippets and settings. This can't be undone."
         onConfirm={async () => {
           await deleteAccount(deletePassword);
           toast.success('Account deleted');

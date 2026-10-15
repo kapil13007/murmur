@@ -1,16 +1,15 @@
 // File: app/services/dictionary_service.js
-// Vocabulary + snippets management, team sharing, bulk import, and learning
-// new words from the corrections a user makes to their transcripts.
-import { badRequest, conflict, forbidden, notFound } from '../core/errors.js';
+// Vocabulary + snippets management, bulk import, and learning new words from
+// the corrections a user makes to their transcripts.
+import { conflict, notFound } from '../core/errors.js';
 import {
   createEntry,
   deleteEntries,
   findByPhrase,
-  getVisibleEntry,
+  getOwnEntry,
   listEntries,
   updateEntry,
 } from '../crud/dictionary_crud.js';
-import { getMembership, getTeamIdForUser } from '../crud/team_crud.js';
 import { DictionaryEntry } from '../models/index.js';
 import { toEntryOut } from '../schemas/dictionary_schema.js';
 import { COMMON_WORDS, phoneticKey, similarity, squash } from './formatting/text_utils.js';
@@ -20,14 +19,11 @@ import { publish } from './realtime_service.js';
 const kindLabel = (isSnippet) => (isSnippet ? 'snippet' : 'word');
 
 export async function listForUser(user, query, isSnippet) {
-  const teamId = await getTeamIdForUser(user.id);
-  const rows = await listEntries(user.id, teamId, { ...query, isSnippet });
-  return { has_team: Boolean(teamId), items: rows.map((r) => toEntryOut(r, user.id)) };
+  const rows = await listEntries(user.id, { ...query, isSnippet });
+  return { items: rows.map(toEntryOut) };
 }
 
-export async function addEntry(user, { phrase, replacement, share_with_team }, isSnippet, source = 'manual') {
-  const teamId = share_with_team ? await getTeamIdForUser(user.id) : null;
-  if (share_with_team && !teamId) throw badRequest(`To share ${kindLabel(isSnippet)}s with a team, create or join one in Settings > Team.`);
+export async function addEntry(user, { phrase, replacement }, isSnippet, source = 'manual') {
   if (await findByPhrase(user.id, phrase, isSnippet)) {
     throw conflict(isSnippet ? 'You already have a snippet with that name' : 'That word is already in your dictionary');
   }
@@ -35,71 +31,46 @@ export async function addEntry(user, { phrase, replacement, share_with_team }, i
   if (!isSnippet && replacement?.trim() === phrase.trim()) replacement = null;
   const entry = await createEntry({
     user_id: user.id,
-    team_id: teamId,
     phrase: phrase.trim(),
     replacement: replacement?.trim() ? (isSnippet ? replacement : replacement.trim()) : null,
     is_snippet: isSnippet,
     source,
   });
   publish(user.id, 'dictionary.changed', { is_snippet: isSnippet });
-  return toEntryOut(entry, user.id);
+  return toEntryOut(entry);
 }
 
-// Owners edit their entries; team admins may also edit/delete team entries.
-async function loadEditable(user, id, isSnippet) {
-  const teamId = await getTeamIdForUser(user.id);
-  const entry = await getVisibleEntry(user.id, teamId, id, isSnippet);
+async function loadOwn(user, id, isSnippet) {
+  const entry = await getOwnEntry(user.id, id, isSnippet);
   if (!entry) throw notFound(`${isSnippet ? 'Snippet' : 'Word'} not found`);
-  if (entry.user_id !== user.id) {
-    const membership = await getMembership(user.id);
-    if (!membership || membership.role !== 'admin' || membership.team_id !== entry.team_id) {
-      throw forbidden(`Only the person who added this ${kindLabel(isSnippet)} or a team admin can change it`);
-    }
-  }
   return entry;
 }
 
 export async function editEntry(user, id, changes, isSnippet) {
-  const entry = await loadEditable(user, id, isSnippet);
+  const entry = await loadOwn(user, id, isSnippet);
   if (changes.phrase && changes.phrase.toLowerCase() !== entry.phrase.toLowerCase()) {
-    const clash = await findByPhrase(entry.user_id, changes.phrase, isSnippet);
+    const clash = await findByPhrase(user.id, changes.phrase, isSnippet);
     if (clash && clash.id !== entry.id) throw conflict(`You already have that ${kindLabel(isSnippet)}`);
   }
   const before = JSON.stringify([entry.phrase, entry.replacement, entry.is_starred]);
   await updateEntry(entry, changes);
   if (JSON.stringify([entry.phrase, entry.replacement, entry.is_starred]) === before) {
-    return { ...toEntryOut(entry, user.id), unchanged: true };
+    return { ...toEntryOut(entry), unchanged: true };
   }
   publish(user.id, 'dictionary.changed', { is_snippet: isSnippet });
-  return toEntryOut(entry, user.id);
+  return toEntryOut(entry);
 }
 
 export async function removeEntries(user, ids, isSnippet) {
   const deletable = [];
   for (const id of ids) {
-    try {
-      deletable.push((await loadEditable(user, id, isSnippet)).id);
-    } catch {
-      // Silently skip entries the user can't see or delete.
-    }
+    const entry = await getOwnEntry(user.id, id, isSnippet);
+    // Silently skip entries that don't exist (or aren't this user's).
+    if (entry) deletable.push(entry.id);
   }
   const deleted = deletable.length ? await deleteEntries(deletable) : 0;
   if (deleted) publish(user.id, 'dictionary.changed', { is_snippet: isSnippet });
   return { deleted, failed: ids.length - deleted };
-}
-
-export async function setShared(user, ids, isSnippet, shared) {
-  const teamId = await getTeamIdForUser(user.id);
-  if (shared && !teamId) throw badRequest('Create or join a team in Settings > Team first');
-  let changed = 0;
-  for (const id of ids) {
-    const entry = await getVisibleEntry(user.id, teamId, id, isSnippet);
-    if (!entry || entry.user_id !== user.id) continue;
-    await updateEntry(entry, { team_id: shared ? teamId : null });
-    changed++;
-  }
-  publish(user.id, 'dictionary.changed', { is_snippet: isSnippet });
-  return { changed };
 }
 
 // One entry per line. Accepted forms:
@@ -239,7 +210,7 @@ export async function learnFromEdit(user, prefs, beforeText, afterText) {
       {
         type: 'learning',
         key: `learning:${added.map((e) => e.id).join(',')}`,
-        title: `Flow learned ${added.length} new word${added.length > 1 ? 's' : ''}`,
+        title: `Murmur learned ${added.length} new word${added.length > 1 ? 's' : ''}`,
         body: `Added ${names} to your dictionary so it's spelled right next time.`,
         action_label: 'Open dictionary',
         action_url: '/dictionary',
@@ -248,5 +219,5 @@ export async function learnFromEdit(user, prefs, beforeText, afterText) {
     );
     publish(user.id, 'dictionary.changed', { is_snippet: false });
   }
-  return added.map((e) => toEntryOut(e, user.id));
+  return added.map(toEntryOut);
 }

@@ -28,14 +28,6 @@ export function incrementAppUsage(userId, appName, category, words, options = {}
   );
 }
 
-export function getDailyActivity(userId, fromDate, toDate) {
-  return DailyActivity.findAll({
-    where: { user_id: userId, activity_date: { [Op.between]: [fromDate, toDate] } },
-    order: [['activity_date', 'ASC']],
-    raw: true,
-  });
-}
-
 export function getActiveDates(userId) {
   return DailyActivity.findAll({
     where: { user_id: userId, words: { [Op.gt]: 0 } },
@@ -63,15 +55,6 @@ export async function sumWordsSince(userId, fromDate) {
     { replacements: { userId, fromDate }, type: sequelize.QueryTypes.SELECT },
   );
   return row.words;
-}
-
-export function listAppUsage(userId, limit = 10) {
-  return AppUsage.findAll({
-    where: { user_id: userId },
-    order: [['words', 'DESC']],
-    limit,
-    raw: true,
-  });
 }
 
 export function countApps(userId) {

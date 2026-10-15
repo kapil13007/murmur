@@ -38,7 +38,7 @@ export default function ImportModal({ isOpen, noun, help, onClose, onImport }) {
     <Modal isOpen={isOpen} onClose={close} title={`Import ${noun}s`} subtitle={help} size="lg">
       <textarea
         className="input min-h-[180px] resize-y font-mono text-[13px]"
-        placeholder={noun === 'word' ? 'Kubernetes\nwisper flow -> Wispr Flow' : 'my calendar link => https://cal.com/you\nmy address => 221B Baker Street'}
+        placeholder={noun === 'word' ? 'Kubernetes\nmur mur -> Murmur' : 'my calendar link => https://cal.com/you\nmy address => 221B Baker Street'}
         value={text}
         onChange={(e) => setText(e.target.value)}
       />

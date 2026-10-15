@@ -1,8 +1,8 @@
 // File: src/components/entries/EntryRow.jsx
-import { ArrowRight, Pencil, Sparkles, Star, Trash2, Users, UserRound } from 'lucide-react';
+import { ArrowRight, Pencil, Sparkles, Star, Trash2 } from 'lucide-react';
 import clsx from 'clsx';
 
-export default function EntryRow({ entry, noun, hasTeam, selected, selectionMode, onSelect, onStar, onEdit, onShare, onDelete }) {
+export default function EntryRow({ entry, noun, selected, selectionMode, onSelect, onStar, onEdit, onDelete }) {
   const isSnippet = noun === 'snippet';
   return (
     <div className={clsx('group flex items-center gap-4 px-5 py-3.5 transition hover:bg-subtle/60', selected && 'bg-dawn-100 dark:bg-vast-800')}>
@@ -36,25 +36,11 @@ export default function EntryRow({ entry, noun, hasTeam, selected, selectionMode
             <Sparkles size={11} /> Auto-added
           </span>
         )}
-        {entry.is_shared && (
-          <span className="inline-flex items-center gap-1 rounded-full bg-dawn-300 px-2 py-0.5 text-[11px] font-semibold text-dawn-800 dark:bg-dawn-900 dark:text-dawn-200" title={entry.is_owner ? 'Shared with team' : `Shared by ${entry.owner_name}`}>
-            <Users size={11} /> {entry.is_owner ? 'Team' : entry.owner_name}
-          </span>
-        )}
         {entry.frequency_used > 0 && <span className="text-xs text-faint">Used {entry.frequency_used}×</span>}
         <button onClick={onStar} className={clsx('rounded-lg p-1.5 transition hover:bg-panel', entry.is_starred ? 'text-glow-300' : 'text-faint opacity-0 group-hover:opacity-100')} title={entry.is_starred ? 'Unstar' : 'Star'}>
           <Star size={16} fill={entry.is_starred ? 'currentColor' : 'none'} />
         </button>
         <div className="flex items-center opacity-0 transition group-hover:opacity-100">
-          {hasTeam && entry.is_owner && (
-            <button
-              onClick={() => onShare(!entry.is_shared)}
-              className="rounded-lg p-1.5 text-faint hover:bg-panel hover:text-ink"
-              title={entry.is_shared ? 'Make personal' : 'Share with team'}
-            >
-              {entry.is_shared ? <UserRound size={16} /> : <Users size={16} />}
-            </button>
-          )}
           <button onClick={onEdit} className="rounded-lg p-1.5 text-faint hover:bg-panel hover:text-ink" title="Edit">
             <Pencil size={16} />
           </button>

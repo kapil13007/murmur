@@ -1,5 +1,5 @@
 // File: app/schemas/misc_schema.js
-// Small request schemas for devices, referrals and notifications.
+// Small request schemas for devices and notifications.
 import { z } from 'zod';
 
 export const RegisterDeviceRequest = z.object({
@@ -22,10 +22,6 @@ export function toDeviceOut(d) {
     created_at: d.created_at,
   };
 }
-
-export const ReferralInviteRequest = z.object({
-  email: z.email('Enter a valid email address').transform((e) => e.trim().toLowerCase()),
-});
 
 export const NotificationsQuery = z.object({
   include_archived: z

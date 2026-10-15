@@ -15,7 +15,7 @@ export default function Logo({ size = 28 }) {
   return (
     <span className="inline-flex items-center gap-2">
       <LogoMark size={size} />
-      <span className="font-display text-[22px] leading-none tracking-tight text-ink">Flow</span>
+      <span className="font-display text-[22px] leading-none tracking-tight text-ink">Murmur</span>
     </span>
   );
 }

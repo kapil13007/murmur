@@ -48,12 +48,12 @@ export default function GeneralSettings() {
             <option value="system">System</option>
           </select>
         </SettingRow>
-        <SettingRow label="App Language" description="Select your preferred Whisper Flow Hub language">
+        <SettingRow label="App Language" description="Select your preferred Murmur language">
           <select className="input w-36 py-1.5" value="en" disabled>
             <option value="en">English</option>
           </select>
         </SettingRow>
-        <SettingRow label="Time zone" description="Used for streaks, daily stats and the weekly word reset.">
+        <SettingRow label="Time zone" description="Used for streaks and daily stats.">
           <span className="text-sm text-muted">{prefs.timezone}</span>
         </SettingRow>
       </SettingSection>

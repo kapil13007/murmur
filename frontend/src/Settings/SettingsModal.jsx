@@ -1,15 +1,13 @@
 // File: src/Settings/SettingsModal.jsx
-// Settings as a large modal over the current page, like Wispr Flow's hub.
+// Settings as a large modal over the current page.
 import { useEffect } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { CreditCard, Shield, SlidersHorizontal, Monitor, UserRound, Users, X } from 'lucide-react';
+import { Shield, SlidersHorizontal, Monitor, UserRound, X } from 'lucide-react';
 import clsx from 'clsx';
 import AccountSettings from './components/AccountSettings';
 import GeneralSettings from './components/GeneralSettings';
-import PlansSettings from './components/PlansSettings';
 import PrivacySettings from './components/PrivacySettings';
 import SystemSettings from './components/SystemSettings';
-import TeamSettings from './components/TeamSettings';
 
 const GROUPS = [
   {
@@ -23,8 +21,6 @@ const GROUPS = [
     label: 'Account',
     items: [
       { id: 'account', label: 'Account', icon: UserRound, Component: AccountSettings },
-      { id: 'team', label: 'Team', icon: Users, Component: TeamSettings },
-      { id: 'plans', label: 'Plans and Billing', icon: CreditCard, Component: PlansSettings },
       { id: 'privacy', label: 'Data and Privacy', icon: Shield, Component: PrivacySettings },
     ],
   },

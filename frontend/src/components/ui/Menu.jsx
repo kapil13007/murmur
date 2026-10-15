@@ -1,9 +1,10 @@
 // File: src/components/ui/Menu.jsx
-// Small dropdown menu anchored to its trigger.
+// Small dropdown menu anchored to its trigger. placement="top" opens it
+// upwards (for triggers at the bottom of the screen, like the profile row).
 import { useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
 
-export default function Menu({ trigger, items, align = 'right', width = 'w-56', onOpenChange }) {
+export default function Menu({ trigger, items, align = 'right', width = 'w-56', placement = 'bottom', onOpenChange }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
@@ -34,7 +35,8 @@ export default function Menu({ trigger, items, align = 'right', width = 'w-56', 
       {open && (
         <div
           className={clsx(
-            'absolute z-40 mt-1 animate-pop-in rounded-xl bg-panel p-1 shadow-pop',
+            'absolute z-40 animate-pop-in rounded-xl bg-panel p-1 shadow-pop',
+            placement === 'top' ? 'bottom-full mb-1.5' : 'mt-1',
             width,
             align === 'right' ? 'right-0' : 'left-0',
           )}

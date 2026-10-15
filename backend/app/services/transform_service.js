@@ -59,12 +59,11 @@ async function resolveInstruction(userId, { transform_id, instruction }) {
   return { transform, instruction: transform.instruction, llmInstruction: transform.instruction };
 }
 
-export async function applyTransform(userId, { text, transform_id, instruction, app_name }, { noteId = null } = {}) {
+export async function applyTransform(userId, { text, transform_id, instruction, app_name }) {
   const resolved = await resolveInstruction(userId, { transform_id, instruction });
   const base = {
     user_id: userId,
     transform_id: resolved.transform ? resolved.transform.id : null,
-    note_id: noteId,
     instruction: resolved.instruction,
     input_text: text,
     input_word_count: countWords(text),

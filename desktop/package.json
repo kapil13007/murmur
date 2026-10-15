@@ -1,9 +1,9 @@
 {
-  "name": "prem-whisper-flow-desktop",
-  "productName": "Whisper Flow",
+  "name": "prem-murmur-desktop",
+  "productName": "Murmur",
   "version": "1.0.0",
   "private": true,
-  "description": "Whisper Flow desktop app: global push-to-talk dictation into any app",
+  "description": "Murmur desktop app: global push-to-talk dictation into any app",
   "author": "Prem",
   "main": "main/index.js",
   "scripts": {
@@ -15,8 +15,8 @@
     "dist": "npm run build:helper && electron-builder --win"
   },
   "build": {
-    "appId": "com.prem.whisperflow",
-    "productName": "Whisper Flow",
+    "appId": "com.prem.murmur",
+    "productName": "Murmur",
     "directories": {
       "output": "dist"
     },
@@ -29,8 +29,8 @@
     ],
     "extraResources": [
       {
-        "from": "helper/bin/FlowHelper.exe",
-        "to": "FlowHelper.exe"
+        "from": "helper/bin/MurmurHelper.exe",
+        "to": "MurmurHelper.exe"
       }
     ],
     "win": {

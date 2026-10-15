@@ -75,7 +75,7 @@ export function createApp() {
     app.use(express.static(FRONTEND_DIST, { index: false, maxAge: '1h' }));
     app.get(/^(?!\/api\/).*/, (req, res) => res.sendFile(path.join(FRONTEND_DIST, 'index.html')));
   } else {
-    app.get('/', (req, res) => res.json({ message: 'Welcome to the Whisper Flow API', docs: '/api/v1/system/health' }));
+    app.get('/', (req, res) => res.json({ message: 'Welcome to the Murmur API', docs: '/api/v1/system/health' }));
   }
 
   app.use(notFoundHandler);

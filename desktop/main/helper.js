@@ -1,5 +1,5 @@
 // File: desktop/main/helper.js
-// Bridge to FlowHelper.exe (global keyboard hook, paste/copy, foreground app,
+// Bridge to MurmurHelper.exe (global keyboard hook, paste/copy, foreground app,
 // system mute). Commands go out as tab-separated lines, JSON comes back.
 const fs = require('node:fs');
 const path = require('node:path');
@@ -10,8 +10,8 @@ const { ROOT } = require('./config');
 
 function helperPath() {
   const candidates = [
-    path.join(process.resourcesPath || '', 'FlowHelper.exe'), // packaged (extraResources)
-    path.join(ROOT, 'helper', 'bin', 'FlowHelper.exe'), // development
+    path.join(process.resourcesPath || '', 'MurmurHelper.exe'), // packaged (extraResources)
+    path.join(ROOT, 'helper', 'bin', 'MurmurHelper.exe'), // development
   ];
   return candidates.find((p) => p && fs.existsSync(p)) || null;
 }
@@ -35,7 +35,7 @@ class Helper extends EventEmitter {
   start() {
     const exe = helperPath();
     if (process.platform !== 'win32' || !exe) {
-      this.emit('unavailable', 'FlowHelper.exe not found (run "npm run build:helper")');
+      this.emit('unavailable', 'MurmurHelper.exe not found (run "npm run build:helper")');
       return;
     }
     this.child = spawn(exe, [], { windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'] });
@@ -60,7 +60,7 @@ class Helper extends EventEmitter {
         console.warn(`[helper] exited with ${code}; restarting`);
         setTimeout(() => this.start(), 500 * this.restarts);
       } else {
-        this.emit('unavailable', 'FlowHelper keeps crashing');
+        this.emit('unavailable', 'MurmurHelper keeps crashing');
       }
     });
   }

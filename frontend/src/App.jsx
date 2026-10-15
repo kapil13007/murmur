@@ -1,6 +1,6 @@
 // File: src/App.jsx
 // Routing for the hub. Pages are lazy-loaded; Settings is a modal route that
-// opens on top of whichever page the user was on (like Wispr Flow's hub).
+// opens on top of whichever page the user was on.
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
@@ -16,11 +16,7 @@ const Home = lazy(() => import('./Home/Home'));
 const Dictionary = lazy(() => import('./Dictionary/Dictionary'));
 const Snippets = lazy(() => import('./Snippets/Snippets'));
 const Style = lazy(() => import('./Style/Style'));
-const Notes = lazy(() => import('./Notes/Notes'));
-const NoteEditor = lazy(() => import('./Notes/NoteEditor'));
-const Insights = lazy(() => import('./Insights/Insights'));
 const Transforms = lazy(() => import('./Transforms/Transforms'));
-const Referral = lazy(() => import('./Referral/Referral'));
 const SettingsModal = lazy(() => import('./Settings/SettingsModal'));
 
 function AppRoutes() {
@@ -53,11 +49,7 @@ function AppRoutes() {
           <Route path="dictionary" element={<Dictionary />} />
           <Route path="snippets" element={<Snippets />} />
           <Route path="style" element={<Style />} />
-          <Route path="notes" element={<Notes />} />
-          <Route path="notes/:id" element={<NoteEditor />} />
-          <Route path="insights" element={<Insights />} />
           <Route path="transforms" element={<Transforms />} />
-          <Route path="referral" element={<Referral />} />
           {/* Direct link to settings: show Home underneath. */}
           <Route
             path="settings/:section?"

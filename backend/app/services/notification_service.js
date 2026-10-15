@@ -7,13 +7,12 @@ import { toNotificationOut } from '../schemas/misc_schema.js';
 import { publish } from './realtime_service.js';
 
 // Which Settings > Notifications toggle governs each notification type.
-// Usage, billing and system notifications cannot be switched off.
+// System notifications cannot be switched off.
 const SETTING_FOR_TYPE = {
   milestone: 'milestones_and_progress',
   tip: 'tips_and_suggestions',
   learning: 'tips_and_suggestions',
   feature: 'feature_highlights',
-  team: 'team_updates',
 };
 
 export async function notify(userId, data, { prefs } = {}) {
@@ -41,9 +40,9 @@ export async function checkMilestones(userId, prefs, { wordsBefore, wordsAfter, 
           type: 'milestone',
           key: `milestone:words:${milestone}`,
           title: `You've dictated ${fmt(milestone)} words!`,
-          body: `That's about ${Math.round(milestone / 40)} minutes of typing saved. Keep the flow going.`,
-          action_label: 'See insights',
-          action_url: '/insights',
+          body: `That's about ${Math.round(milestone / 40)} minutes of typing saved. Keep it going.`,
+          action_label: 'See history',
+          action_url: '/',
         },
         { prefs },
       );
@@ -56,9 +55,9 @@ export async function checkMilestones(userId, prefs, { wordsBefore, wordsAfter, 
         type: 'milestone',
         key: `milestone:streak:${dayStreak}`,
         title: `${dayStreak}-day streak 🔥`,
-        body: `You've used Flow ${dayStreak} days in a row. Consistency looks good on you.`,
-        action_label: 'See insights',
-        action_url: '/insights',
+        body: `You've used Murmur ${dayStreak} days in a row. Consistency looks good on you.`,
+        action_label: 'See history',
+        action_url: '/',
       },
       { prefs },
     );
@@ -69,7 +68,7 @@ export function sendWelcome(user) {
   return notify(user.id, {
     type: 'tip',
     key: 'welcome',
-    title: `Welcome to Whisper Flow, ${user.first_name}!`,
+    title: `Welcome to Murmur, ${user.first_name}!`,
     body: 'Hold Ctrl + Win in any app and start speaking. Release to paste clean, formatted text.',
     action_label: 'Try it',
     action_url: '/',

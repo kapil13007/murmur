@@ -21,7 +21,7 @@ export default function EditTranscriptModal({ transcript, onClose, onSave }) {
       isOpen
       onClose={onClose}
       title="Edit transcript"
-      subtitle="Fix names or terms Flow got wrong — they'll be added to your dictionary automatically."
+      subtitle="Fix names or terms Murmur got wrong — they'll be added to your dictionary automatically."
       size="lg"
     >
       <textarea className="input min-h-[160px] resize-y text-[15px] leading-relaxed" value={text} onChange={(e) => setText(e.target.value)} autoFocus />

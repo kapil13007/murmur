@@ -15,7 +15,7 @@ function BrandPanel() {
           um so I think we should, uh, meet at 3… actually let&apos;s do 4 pm
         </div>
         <div className="ml-10 max-w-sm rounded-2xl bg-vast-950 p-4 text-sm text-sand-50 shadow-pop">
-          <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-dawn-500">Flow typed</p>
+          <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-dawn-500">Murmur typed</p>
           I think we should meet at 4 PM.
         </div>
       </div>

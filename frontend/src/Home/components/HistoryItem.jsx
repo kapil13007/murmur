@@ -33,7 +33,7 @@ import FeedbackModal from './FeedbackModal';
 
 const STATUS_TEXT = {
   no_audio: 'Audio is silent.',
-  empty: "Flow couldn't make out any words.",
+  empty: "Murmur couldn't make out any words.",
   error: 'This transcription failed.',
   dismissed: 'The transcription was dismissed.',
 };
@@ -169,7 +169,7 @@ export default function HistoryItem({ transcript: t, onChange, onRemove }) {
           onSave={async (edited) => {
             const updated = await patch({ edited_text: edited });
             if (updated?.learned_words?.length) {
-              toast.success(`Flow learned ${updated.learned_words.map((w) => `"${w.replacement || w.phrase}"`).join(', ')}`);
+              toast.success(`Murmur learned ${updated.learned_words.map((w) => `"${w.replacement || w.phrase}"`).join(', ')}`);
             } else if (updated) toast.success('Transcript updated');
             setEditing(false);
           }}

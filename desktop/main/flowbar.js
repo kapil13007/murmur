@@ -1,5 +1,5 @@
 // File: desktop/main/flowbar.js
-// Main-process side of the Flow Bar: drives its UI state and its recorder.
+// Main-process side of the Murmur bar: drives its UI state and its recorder.
 // The recorder runs in the bar's renderer (getUserMedia + AudioWorklet) and
 // hands back a 16 kHz WAV when told to stop.
 const { ipcMain } = require('electron');
@@ -49,7 +49,7 @@ function call(action, data = {}, timeoutMs = 5000) {
   return new Promise((resolve, reject) => {
     const timer = setTimeout(() => {
       pending.delete(requestId);
-      reject(new Error(`Flow Bar did not answer "${action}"`));
+      reject(new Error(`Murmur bar did not answer "${action}"`));
     }, timeoutMs);
     pending.set(requestId, { resolve, reject, timer });
     send('bar:record', { action, requestId, ...data });

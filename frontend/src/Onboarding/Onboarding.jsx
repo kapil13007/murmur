@@ -83,7 +83,7 @@ export default function Onboarding() {
           {current === 'welcome' && (
             <div className="text-center">
               <p className="font-display text-[56px] leading-[1.05] text-ink">
-                Welcome to Flow,
+                Welcome to Murmur,
                 <br />
                 <span className="italic">{user?.first_name}</span>
               </p>
@@ -100,14 +100,14 @@ export default function Onboarding() {
           )}
 
           {current === 'typing' && (
-            <Step title="Where do you spend time typing?" subtitle="This helps us personalize Flow where you work. Select all that apply.">
+            <Step title="Where do you spend time typing?" subtitle="This helps us personalize Murmur where you work. Select all that apply.">
               <ChipGroup options={LOCATIONS} value={locations} onChange={setLocations} />
               <Footer back={back}>{continueButton('Continue', !locations.length)}</Footer>
             </Step>
           )}
 
           {current === 'privacy' && (
-            <Step title="Your data, your choice" subtitle="Choose how Flow stores your dictations. You can change this any time in Settings.">
+            <Step title="Your data, your choice" subtitle="Choose how Murmur stores your dictations. You can change this any time in Settings.">
               <PrivacyStep />
               <Footer back={back}>{continueButton()}</Footer>
             </Step>
@@ -129,7 +129,7 @@ export default function Onboarding() {
           )}
 
           {current === 'shortcut' && (
-            <Step title="Your dictation shortcut" subtitle="Hold the keys, speak, and let go. Flow types for you wherever your cursor is.">
+            <Step title="Your dictation shortcut" subtitle="Hold the keys, speak, and let go. Murmur types for you wherever your cursor is.">
               <ShortcutStep />
               <Footer back={back}>{continueButton()}</Footer>
             </Step>
@@ -154,12 +154,12 @@ export default function Onboarding() {
                   <p className="font-display text-3xl text-ink">40 WPM</p>
                 </div>
                 <div className="rounded-2xl border border-ink bg-raised p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted">With Flow</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted">With Murmur</p>
                   <p className="font-display text-3xl text-ink">150+ WPM</p>
                 </div>
               </div>
               <button className="btn-primary mt-8 px-8 py-2.5" onClick={finish} disabled={busy}>
-                {busy ? 'Finishing…' : 'Start using Flow'}
+                {busy ? 'Finishing…' : 'Start using Murmur'}
               </button>
             </div>
           )}

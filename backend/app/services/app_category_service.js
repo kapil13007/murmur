@@ -1,6 +1,7 @@
 // File: app/services/app_category_service.js
 // Decides which writing style applies to a dictation from the app it was
-// spoken into (Wispr's per-app "Style" categories).
+// spoken into (per-app "Style" categories), and what kind of text box the
+// cursor is in.
 
 const DOMAINS = {
   email: ['mail.google.com', 'outlook.live.com', 'outlook.office.com', 'outlook.office365.com', 'mail.yahoo.com', 'mail.proton.me', 'superhuman.com', 'app.fastmail.com', 'app.hey.com', 'mail.zoho.com'],
@@ -61,4 +62,21 @@ export function categorizeApp({ appName, url, windowTitle } = {}, styleProfiles 
     if (app && names.some((n) => wordMatch(app, n))) return category;
   }
   return 'other';
+}
+
+// The desktop app reports the focused text box's accessible name, e.g.
+// Gmail's "To recipients" / "Subject" / "Message Body", or Chrome's
+// "Address and search bar".
+//   address - recipients / email fields: only addresses, never sentences
+//   short   - one-line fields (subject, search, URL bar): no final period
+//   text    - everything else
+const ADDRESS_FIELD = /^(?:(?:to|cc|bcc)(?: recipients?)?|recipients?|e-?mail(?: address)?)$/i;
+const SHORT_FIELD = /subject|search|\bfind\b|address bar|\burl\b|\btitle\b|\bname\b|user ?name|\bphone\b|\bquery\b/i;
+
+export function classifyField(fieldName) {
+  const name = (fieldName || '').trim();
+  if (!name) return 'text';
+  if (ADDRESS_FIELD.test(name)) return 'address';
+  if (SHORT_FIELD.test(name)) return 'short';
+  return 'text';
 }

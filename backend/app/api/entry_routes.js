@@ -5,14 +5,7 @@ import { Router } from 'express';
 import { notFound } from '../core/errors.js';
 import { uuidParam, validate } from '../core/validators.js';
 import { BulkIdsRequest, ImportRequest, ListEntriesQuery } from '../schemas/dictionary_schema.js';
-import {
-  addEntry,
-  editEntry,
-  importEntries,
-  listForUser,
-  removeEntries,
-  setShared,
-} from '../services/dictionary_service.js';
+import { addEntry, editEntry, importEntries, listForUser, removeEntries } from '../services/dictionary_service.js';
 
 export function buildEntryRouter({ isSnippet, createSchema, updateSchema }) {
   const router = Router();
@@ -28,14 +21,6 @@ export function buildEntryRouter({ isSnippet, createSchema, updateSchema }) {
 
   router.post('/bulk-delete', validate({ body: BulkIdsRequest }), async (req, res) => {
     res.json(await removeEntries(req.user, req.body.ids, isSnippet));
-  });
-
-  router.post('/share', validate({ body: BulkIdsRequest }), async (req, res) => {
-    res.json(await setShared(req.user, req.body.ids, isSnippet, true));
-  });
-
-  router.post('/unshare', validate({ body: BulkIdsRequest }), async (req, res) => {
-    res.json(await setShared(req.user, req.body.ids, isSnippet, false));
   });
 
   router.post('/import', validate({ body: ImportRequest }), async (req, res) => {

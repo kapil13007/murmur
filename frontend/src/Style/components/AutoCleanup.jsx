@@ -18,7 +18,7 @@ export default function AutoCleanup({ examples }) {
 
   return (
     <div className="mt-6 space-y-6">
-      <p className="text-sm text-muted">Choose how much Flow edits each dictation for clarity and correctness.</p>
+      <p className="text-sm text-muted">Choose how much Murmur edits each dictation for clarity and correctness.</p>
       <div className="grid gap-3 sm:grid-cols-2">
         {examples.map(({ level, example }) => (
           <button

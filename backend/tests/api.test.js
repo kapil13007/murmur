@@ -31,15 +31,15 @@ describe('auth', () => {
   test('register, login, me and token revocation', async () => {
     const user = await registerUser({ email: 'alice@example.com' });
     assert.equal(user.user.email, 'alice@example.com');
-    assert.match(user.user.referral_code, /^TEST\d{3}$/);
 
     await api().post(`${V1}/auth/register`).send({ email: 'ALICE@example.com', password: 'Secret123', first_name: 'A' }).expect(409);
     await api().post(`${V1}/auth/login`).send({ email: 'alice@example.com', password: 'nope-nope1' }).expect(401);
     const login = await api().post(`${V1}/auth/login`).send({ email: 'alice@example.com', password: 'Secret123' }).expect(200);
 
     const me = await api().get(`${V1}/users/me`).set('Authorization', `Bearer ${login.body.access_token}`).expect(200);
-    assert.equal(me.body.subscription.status, 'trialing');
-    assert.equal(me.body.subscription.is_pro, true);
+    assert.equal(me.body.user.email, 'alice@example.com');
+    assert.equal(me.body.unread_notifications, 1); // the welcome note
+    assert.equal(me.body.subscription, undefined);
 
     const changed = await api()
       .post(`${V1}/auth/change-password`)
@@ -132,15 +132,25 @@ describe('dictation pipeline', () => {
     assert.equal(res.body.snippets_expanded, 1);
   });
 
-  test('weekly allowance blocks Basic users at the limit', async () => {
+  test('there is no word limit', async () => {
     const user = await registerUser();
-    await api().post(`${V1}/billing/cancel`).set(user.auth).expect(200); // end trial -> Basic
     await sequelize.query(
-      `INSERT INTO daily_activity (user_id, activity_date, words, dictations, duration_seconds) VALUES (:id, CURRENT_DATE, 5000, 1, 60)`,
+      `INSERT INTO daily_activity (user_id, activity_date, words, dictations, duration_seconds) VALUES (:id, CURRENT_DATE, 50000, 1, 60)`,
       { replacements: { id: user.user.id } },
     );
-    const res = await api().post(`${V1}/dictation/transcribe`).set(user.auth).attach('audio', fixture('lunch.wav'), 'lunch.wav').expect(402);
-    assert.equal(res.body.code, 'weekly_limit_reached');
+    const res = await api().post(`${V1}/dictation/transcribe`).set(user.auth).attach('audio', fixture('lunch.wav'), 'lunch.wav').expect(200);
+    assert.equal(res.body.status, 'success');
+  });
+
+  test('the focused field shapes the result: address boxes and subject lines', async () => {
+    const user = await registerUser();
+    const format = (text, fieldName) =>
+      api().post(`${V1}/dictation/format`).set(user.auth).send({ text, app_name: 'Google Chrome', field_name: fieldName }).expect(200);
+    assert.equal((await format('kapil dot login hta at gmail dot com', 'To recipients')).body.text, 'kapil.loginhta@gmail.com');
+    // A name typed into To is left for the mail app to autocomplete.
+    assert.equal((await format('Sarah.', 'To recipients')).body.text, 'Sarah');
+    assert.equal((await format('quarterly report draft', 'Subject')).body.text, 'Quarterly report draft');
+    assert.equal((await format('send it to kapil at gmail dot com', 'Message Body')).body.text, 'Send it to kapil@gmail.com');
   });
 });
 
@@ -211,43 +221,19 @@ describe('dictionary and snippets', () => {
   });
 });
 
-describe('teams', () => {
-  test('shared vocabulary reaches teammates; ownership transfers on leave', async () => {
-    const owner = await registerUser();
-    const member = await registerUser();
-    const created = await api().post(`${V1}/teams`).set(owner.auth).send({ name: 'Acme' }).expect(201);
-    const code = created.body.team.invite_code;
-
-    const word = await api().post(`${V1}/dictionary`).set(owner.auth).send({ phrase: 'Acmeify', share_with_team: true }).expect(201);
-    assert.equal(word.body.is_shared, true);
-
-    await api().post(`${V1}/teams/join`).set(member.auth).send({ invite_code: code }).expect(200);
-    const memberView = await api().get(`${V1}/dictionary?scope=team`).set(member.auth).expect(200);
-    assert.deepEqual(memberView.body.items.map((i) => i.phrase), ['Acmeify']);
-    // Members can't edit someone else's shared word.
-    await api().put(`${V1}/dictionary/${word.body.id}`).set(member.auth).send({ phrase: 'Nope' }).expect(403);
-
-    await api().post(`${V1}/teams/leave`).set(owner.auth).expect(200);
-    const after = await api().get(`${V1}/teams/me`).set(member.auth).expect(200);
-    assert.equal(after.body.team.is_owner, true);
-    assert.equal(after.body.team.my_role, 'admin');
+describe('personal edition', () => {
+  test('team, billing, referral, notes and insights endpoints are gone', async () => {
+    const user = await registerUser();
+    for (const path of ['/teams/me', '/billing/plans', '/billing/subscription', '/referrals', '/notes', '/stats/heatmap', '/stats/apps', '/stats/usage']) {
+      await api().get(`${V1}${path}`).set(user.auth).expect(404);
+    }
+    const word = await api().post(`${V1}/dictionary`).set(user.auth).send({ phrase: 'Murmur' }).expect(201);
+    assert.equal(word.body.is_shared, undefined);
+    await api().post(`${V1}/dictionary/share`).set(user.auth).send({ ids: [word.body.id] }).expect(404);
   });
 });
 
-describe('notes, transforms, billing, export', () => {
-  test('notes keep restorable versions', async () => {
-    const user = await registerUser();
-    // A quick note's first line becomes the title.
-    const note = await api().post(`${V1}/notes`).set(user.auth).send({ content: 'Ideas\nfirst draft' }).expect(201);
-    assert.equal(note.body.title, 'Ideas');
-    assert.equal(note.body.content, 'first draft');
-    await api().patch(`${V1}/notes/${note.body.id}`).set(user.auth).send({ content: 'second draft' }).expect(200);
-    const versions = await api().get(`${V1}/notes/${note.body.id}/versions`).set(user.auth).expect(200);
-    assert.equal(versions.body.length, 1);
-    const restored = await api().post(`${V1}/notes/${note.body.id}/versions/${versions.body[0].id}/restore`).set(user.auth).expect(200);
-    assert.equal(restored.body.content, 'first draft');
-  });
-
+describe('transforms and export', () => {
   test('transforms run offline and custom prompts need an LLM', async () => {
     const user = await registerUser();
     const list = await api().get(`${V1}/transforms`).set(user.auth).expect(200);
@@ -258,29 +244,19 @@ describe('notes, transforms, billing, export', () => {
     await api().delete(`${V1}/transforms/${bullets.id}`).set(user.auth).expect(403);
   });
 
-  test('billing lifecycle', async () => {
-    const user = await registerUser();
-    const paid = await api()
-      .post(`${V1}/billing/checkout`)
-      .set(user.auth)
-      .send({ plan: 'FLOW_PRO', interval: 'month', cardholder_name: 'Test', card_last4: '4242' })
-      .expect(200);
-    assert.equal(paid.body.status, 'active');
-    assert.equal((await api().post(`${V1}/billing/cancel`).set(user.auth).expect(200)).body.cancel_at_period_end, true);
-    assert.equal((await api().post(`${V1}/billing/resume`).set(user.auth).expect(200)).body.cancel_at_period_end, false);
-    const history = await api().get(`${V1}/billing/history`).set(user.auth).expect(200);
-    assert.deepEqual(history.body.map((e) => e.event_type), ['cancel_reverted', 'cancel_scheduled', 'payment_succeeded', 'trial_started']);
-  });
-
   test('export contains every section and delete-account removes everything', async () => {
     const user = await registerUser();
-    await api().post(`${V1}/notes`).set(user.auth).send({ content: 'keep me' }).expect(201);
+    await api().post(`${V1}/dictionary`).set(user.auth).send({ phrase: 'Kapil' }).expect(201);
     const exported = await api().get(`${V1}/data/export`).set(user.auth).expect(200);
-    assert.equal(exported.body.notes.length, 1);
+    assert.equal(exported.body.dictionary.length, 1);
     assert.equal(exported.body.styles.length, 4);
+    assert.equal(exported.body.notes, undefined);
+    assert.equal(exported.body.subscription, undefined);
     await api().delete(`${V1}/users/me`).set(user.auth).send({ password: 'wrong' }).expect(400);
     await api().delete(`${V1}/users/me`).set(user.auth).send({ password: user.password }).expect(204);
-    const [[{ n }]] = await sequelize.query('SELECT count(*)::int AS n FROM notes WHERE user_id = :id', { replacements: { id: user.user.id } });
+    const [[{ n }]] = await sequelize.query('SELECT count(*)::int AS n FROM dictionary_entries WHERE user_id = :id', {
+      replacements: { id: user.user.id },
+    });
     assert.equal(n, 0);
   });
 });

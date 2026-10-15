@@ -1,7 +1,7 @@
 // File: scripts/seed.js
 // Creates a demo account with realistic data so every screen has something to
-// show: ~6 weeks of dictation history across apps, vocabulary, snippets,
-// notes, a transform run and a few notifications.
+// show: ~6 weeks of dictation history across apps, vocabulary, snippets, a
+// transform run and a few notifications.
 //
 //   npm run seed            create the demo user (skips if it exists)
 //   npm run seed -- --reset delete and recreate it
@@ -10,13 +10,13 @@ import { sequelize } from '../app/db/session.js';
 import { createMigrator } from '../app/db/migrator.js';
 import { incrementAppUsage, incrementDailyActivity } from '../app/crud/activity_crud.js';
 import { getUserByEmail } from '../app/crud/user_crud.js';
-import { DictionaryEntry, Note, Transcript, TransformRun, Transform } from '../app/models/index.js';
+import { DictionaryEntry, Transcript, TransformRun, Transform } from '../app/models/index.js';
 import { registerUser } from '../app/services/auth_service.js';
 import { categorizeApp } from '../app/services/app_category_service.js';
 import { countWords } from '../app/services/formatting/text_utils.js';
 import { notify } from '../app/services/notification_service.js';
 
-export const DEMO_EMAIL = 'demo@whisperflow.local';
+export const DEMO_EMAIL = 'demo@murmur.local';
 export const DEMO_PASSWORD = 'Demo12345';
 const TIMEZONE = 'Asia/Kolkata';
 
@@ -41,7 +41,7 @@ async function seedTranscripts(user) {
   const today = localDate(TIMEZONE);
   let made = 0;
   for (let daysAgo = 42; daysAgo >= 0; daysAgo--) {
-    // Skip some days so the heatmap and streaks look real (last 5 days are a streak).
+    // Skip some days so the streaks look real (the last 5 days are a streak).
     if (daysAgo > 5 && (daysAgo % 3 === 0 || daysAgo % 7 === 4)) continue;
     const date = addDays(today, -daysAgo);
     const perDay = 1 + ((daysAgo * 7) % 4);
@@ -117,7 +117,7 @@ async function main() {
     ['Supabase', null, 'manual'],
     ['StatefulSets', null, 'auto_learned'],
     ['Priya', null, 'auto_learned'],
-    ['wisper flow', 'Wispr Flow', 'manual'],
+    ['mur mur', 'Murmur', 'manual'],
     ['Q three', 'Q3', 'manual'],
     ['Rivera', null, 'manual'],
   ];
@@ -132,10 +132,6 @@ async function main() {
   for (const [phrase, replacement] of snippets) {
     await DictionaryEntry.create({ user_id: user.id, phrase, replacement, is_snippet: true, frequency_used: 3 });
   }
-
-  await Note.create({ user_id: user.id, title: 'Launch checklist', content: '- Finalize pricing page\n- Record the demo video\n- Email beta users\n- Schedule the launch review for Thursday', is_pinned: true });
-  await Note.create({ user_id: user.id, title: 'Product ideas', content: 'Voice notes that turn into tasks automatically. A weekly digest of everything I dictated. Per-app writing styles for code review comments.', source: 'dictated' });
-  await Note.create({ user_id: user.id, title: 'Groceries', content: 'Eggs, oat milk, sourdough, spinach, coffee beans' });
 
   const polish = await Transform.findOne({ where: { user_id: user.id, name: 'Polish' } });
   await TransformRun.create({
@@ -155,14 +151,14 @@ async function main() {
     type: 'milestone',
     key: 'milestone:words:500',
     title: "You've dictated 500 words!",
-    body: "That's about 13 minutes of typing saved. Keep the flow going.",
-    action_label: 'See insights',
-    action_url: '/insights',
+    body: "That's about 13 minutes of typing saved. Keep it going.",
+    action_label: 'See history',
+    action_url: '/',
   });
   await notify(user.id, {
     type: 'learning',
     key: 'learning:seed',
-    title: 'Flow learned 2 new words',
+    title: 'Murmur learned 2 new words',
     body: 'Added "Priya", "StatefulSets" to your dictionary so they\'re spelled right next time.',
     action_label: 'Open dictionary',
     action_url: '/dictionary',

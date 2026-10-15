@@ -32,7 +32,6 @@ export function initTransform(sequelize) {
       id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
       user_id: { type: DataTypes.UUID, allowNull: false },
       transform_id: { type: DataTypes.UUID, allowNull: true },
-      note_id: { type: DataTypes.UUID, allowNull: true },
       instruction: { type: DataTypes.TEXT, allowNull: false },
       input_text: { type: DataTypes.TEXT, allowNull: false },
       output_text: { type: DataTypes.TEXT, allowNull: true },

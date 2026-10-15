@@ -19,7 +19,16 @@ const PROVIDERS = {
 // Reasoning-style OpenAI models only accept the default temperature.
 const acceptsTemperature = (provider, model) => provider === 'groq' || /^gpt-4/.test(model);
 
-export async function completeWithOpenAICompatible(provider, { system, user, maxTokens = 4096 }) {
+// Groq's reasoning models think before answering unless told not to, which
+// costs ~0.5-1.5 s per dictation. Cleanup and rewrites don't need it.
+function reasoningOptions(provider, model, effort) {
+  if (provider !== 'groq') return {};
+  if (/qwen3/i.test(model)) return { reasoning_effort: 'none' };
+  if (/gpt-oss/i.test(model)) return { reasoning_effort: effort === 'low' ? 'low' : 'medium', include_reasoning: false };
+  return {};
+}
+
+export async function completeWithOpenAICompatible(provider, { system, user, maxTokens = 4096, effort = 'low' }) {
   const cfg = PROVIDERS[provider];
   const model = cfg.model();
   const body = {
@@ -29,6 +38,7 @@ export async function completeWithOpenAICompatible(provider, { system, user, max
       { role: 'user', content: user },
     ],
     max_completion_tokens: maxTokens,
+    ...reasoningOptions(provider, model, effort),
   };
   if (acceptsTemperature(provider, model)) body.temperature = 0.2;
 

@@ -22,6 +22,8 @@ export const DictationContext = z.object({
   app_name: optionalText(255),
   url: optionalText(512),
   window_title: optionalText(1000),
+  // Accessible name of the focused text box ("To recipients", "Subject").
+  field_name: optionalText(255),
   language: optionalText(10),
   device_uid: optionalText(100),
   mic_device: optionalText(255),
@@ -43,6 +45,7 @@ export const FormatRequest = z.object({
   app_name: z.string().max(255).optional().nullable(),
   url: z.string().max(512).optional().nullable(),
   window_title: z.string().max(1000).optional().nullable(),
+  field_name: z.string().max(255).optional().nullable(),
   style: z.enum(['formal', 'casual', 'very_casual', 'excited']).optional(),
   cleanup_level: z.enum(['none', 'light', 'medium', 'high']).optional(),
 });

@@ -7,15 +7,15 @@ import { SHORTCUT_ACTIONS } from '../utils/shortcuts';
 const TIPS = [
   ['Self-corrections', 'Say "at 3, actually 4" or "scratch that" and only the final version is typed.'],
   ['Spoken formatting', 'Say "new line", "new paragraph" or "question mark", or list items as "one…, two…, three…".'],
-  ['Snippets', 'Say a snippet trigger like "my calendar link" and Flow pastes the full text.'],
-  ['Styles', 'Flow formats differently in chats, work apps and email. Tune it on the Style page.'],
+  ['Snippets', 'Say a snippet trigger like "my calendar link" and Murmur pastes the full text.'],
+  ['Styles', 'Murmur formats differently in chats, work apps and email. Tune it on the Style page.'],
   ['Command Mode', 'Select text, hold the command shortcut and say "make this more formal".'],
 ];
 
 export default function HelpModal({ isOpen, onClose }) {
   const { preferences, isDesktop } = useApp();
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="How to use Flow" subtitle="Speak anywhere you can type." size="lg">
+    <Modal isOpen={isOpen} onClose={onClose} title="How to use Murmur" subtitle="Speak anywhere you can type." size="lg">
       <div className="space-y-6">
         <div>
           <p className="section-label mb-2">Shortcuts</p>
@@ -32,7 +32,7 @@ export default function HelpModal({ isOpen, onClose }) {
           </div>
           {!isDesktop && (
             <p className="mt-2 text-xs text-muted">
-              Global shortcuts work in the Whisper Flow desktop app. In the browser, use the microphone button on Home.
+              Global shortcuts work in the Murmur desktop app. In the browser, use the microphone button on Home.
             </p>
           )}
         </div>

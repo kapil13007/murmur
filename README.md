@@ -1,22 +1,25 @@
-# Whisper Flow
+# Murmur
 
-Whisper Flow is a full-stack voice dictation app modelled on Wispr Flow. Hold a shortcut in any Windows app, speak, let go, and clean, formatted text is typed where your cursor is. The hub app keeps your history, personal dictionary, snippets, writing styles, notes and usage insights in sync through a real API and database.
+Murmur is a personal voice dictation app. Hold a shortcut in any Windows app, speak, let go, and clean, formatted text is typed where your cursor is. A hub app keeps your history, personal dictionary, snippets, writing styles and transforms in sync through a real API and database.
 
-> Independent learning project. Not affiliated with or endorsed by Wispr, Inc. No Wispr code or assets are included. The app's behaviour, screens and data model were studied and then rebuilt from scratch.
+> Independent personal project inspired by Wispr Flow. Not affiliated with or endorsed by Wispr, Inc., and no Wispr code or assets are included.
 
 ## Core Features
 
-**Dictate anywhere.** Hold `Ctrl + Win` to talk, release to paste. `Ctrl + Win + Space` switches to hands-free, `Ctrl + Win + Alt` opens Command Mode, `Esc` cancels, and `Shift + Alt + Z` pastes the last transcript again. A floating **Flow Bar** shows a live waveform. Your clipboard and system audio are restored afterwards.
+**Dictate anywhere.** Hold `Ctrl + Win` to talk, release to paste. `Ctrl + Win + Space` switches to hands-free, `Ctrl + Win + Alt` opens Command Mode, `Esc` cancels, and `Shift + Alt + Z` pastes the last transcript again. A floating **Murmur bar** shows a live waveform. Your clipboard and system audio are restored afterwards.
 
-**Speech-to-text with no API key.** Whisper runs on your machine through transformers.js. Groq or OpenAI Whisper can be switched on for higher accuracy.
+**Accurate speech-to-text.** Groq's `whisper-large-v3-turbo` transcribes in about 0.3 s and is primed with your name and dictionary, so names come out right. If Groq is unreachable, Whisper runs locally instead.
 
-**Smart cleanup.** Removes fillers ("um", "you know"), stutters and self-corrections ("Tuesday, no wait, Wednesday" becomes "Wednesday"). It follows spoken commands ("new line", "scratch that"), builds lists, and adapts to the app you're in: formal for work, casual for chat, a laid-out email for Gmail or Outlook. An optional LLM pass (Claude, OpenAI or Groq) adds AI polish.
+**Smart cleanup.** Groq's `qwen3.8-27b` (or Claude or OpenAI) removes fillers ("um", "you know"), applies self-corrections ("by 3pm, actually make it 4pm" becomes "by 4 PM"), follows spoken commands ("new line", "scratch that"), builds lists, and adapts to the app you're in. A built-in rule engine does the same offline.
 
-**Personal dictionary and snippets.** Teach Flow names and jargon it should always spell right, or have it learn them from your corrections. Say a cue phrase ("my calendar link") to insert a saved snippet. Both can be shared with your team.
+**Knows where you're typing.**
+- Email and web addresses come out exactly as typed: "kapil dot sharma at gmail dot com" becomes `kapil.sharma@gmail.com`.
+- In a To/Cc box only addresses are produced; subject lines and search boxes get no trailing period.
+- Back-to-back dictations get a space between them automatically.
 
-**Notes, Transforms and Command Mode.** Write notes in a scratchpad with version history. Rewrite selected text with one-click Transforms ("make it concise", "fix grammar") or with a spoken instruction.
+**Personal dictionary and snippets.** Teach Murmur names and jargon it should always spell right, or let it learn them from your corrections. Say a cue phrase ("my calendar link") to insert a saved snippet.
 
-**Insights and plans.** See words per day, streaks, an activity heatmap and your top apps. Flow Basic has a weekly word limit, and Pro has a 14-day trial, student plan, team seats and referrals. Checkout is simulated, so no real payments are taken.
+**Transforms and Command Mode.** Rewrite text with one-click transforms ("Make it concise", "Fix grammar") or with a spoken instruction applied to the selected text.
 
 **Privacy controls.** Privacy Mode (recordings are never kept), a "never store history" option, auto-delete after 24 hours, a full data export, and account deletion.
 
@@ -25,19 +28,19 @@ Whisper Flow is a full-stack voice dictation app modelled on Wispr Flow. Hold a 
 | Backend | Frontend (hub) | Desktop |
 | --- | --- | --- |
 | Node.js 24 + Express 5 | React 19 | Electron 44 |
-| PostgreSQL 18 | Vite 8 | FlowHelper.exe (C#, Win32 keyboard hook) |
+| PostgreSQL 18 | Vite 8 | MurmurHelper.exe (C#: keyboard hook, UI Automation) |
 | Sequelize 6 + Umzug migrations | Tailwind CSS 3 | AudioWorklet recorder (16 kHz WAV) |
-| Zod validation | Axios | Windows UI Automation (browser URL) |
-| JWT + bcrypt auth | react-router-dom 7 | Core Audio (mute while dictating) |
-| transformers.js (local Whisper) | lucide-react | safeStorage (DPAPI) for the session |
-| Anthropic SDK / OpenAI-compatible LLMs | Server-Sent Events (live sync) | electron-builder (NSIS installer) |
+| Zod validation | Axios | Core Audio (mute while dictating) |
+| JWT + bcrypt auth | react-router-dom 7 | safeStorage (DPAPI) for the session |
+| Groq (Whisper + Qwen), local Whisper fallback | lucide-react | electron-builder (NSIS installer) |
+| Anthropic SDK / OpenAI-compatible LLMs | Server-Sent Events (live sync) | |
 
 ## 📁 Project Structure
 
 The project is a monorepo with the backend, the hub UI and the desktop app, each organised by responsibility.
 
 ```
-prem-whisper-flow/
+murmur/
 ├── backend/
 │   ├── app/
 │   │   ├── api/          # API Endpoints (Express routers)
@@ -46,8 +49,8 @@ prem-whisper-flow/
 │   │   ├── db/           # Sequelize connection + migrator
 │   │   ├── models/       # Sequelize DB Models
 │   │   ├── schemas/      # Zod Validation Schemas
-│   │   └── services/     # Business Logic (ASR, LLM, formatting, billing...)
-│   ├── migrations/       # Versioned schema (0001-0007)
+│   │   └── services/     # Business Logic (speech-to-text, LLM, formatting...)
+│   ├── migrations/       # Versioned schema (0001-0008)
 │   ├── scripts/          # db:setup, migrate, seed, model:download
 │   ├── tests/            # node:test suites (API + formatting engine)
 │   └── server.js         # App Entrypoint
@@ -57,23 +60,22 @@ prem-whisper-flow/
 │       ├── api/          # Central API Client (Axios)
 │       ├── auth/         # Login, Register Components
 │       ├── components/   # Shared UI (Sidebar, Modals, Waveform)
-│       ├── context/      # Signed-in user, preferences, plan
+│       ├── context/      # Signed-in user and preferences
 │       ├── Home/         # History & Dictation Feature Module
 │       ├── Dictionary/   # Dictionary Feature Module
 │       ├── Snippets/     # Snippets Feature Module
 │       ├── Style/        # Writing Styles Feature Module
-│       ├── Notes/        # Scratchpad Feature Module
 │       ├── Transforms/   # Transforms & Polish Feature Module
-│       ├── Insights/     # Analytics Feature Module
-│       ├── Settings/     # Settings, Plans, Team, Privacy
+│       ├── Notifications/# Notifications drawer
+│       ├── Settings/     # General, System, Account, Privacy
 │       ├── App.jsx       # Main Component & Routing
 │       └── main.jsx      # Entry point
 │
 ├── desktop/
 │   ├── main/             # Electron main process (dictation, tray, windows)
-│   ├── preload/          # Safe bridges for the hub and the Flow Bar
-│   ├── renderer/         # Flow Bar UI + recorder, offline page
-│   ├── helper/           # FlowHelper.cs (global shortcuts, paste, mute)
+│   ├── preload/          # Safe bridges for the hub and the Murmur bar
+│   ├── renderer/         # Murmur bar UI + recorder, offline page
+│   ├── helper/           # MurmurHelper.cs (global shortcuts, paste, mute, focused field)
 │   └── assets/           # App and tray icons
 │
 ├── Dockerfile.backend
@@ -84,31 +86,31 @@ prem-whisper-flow/
 
 ## Quick Start (Windows)
 
-You need Node.js 20+ (24 recommended) and PostgreSQL 15+ (18 recommended). The desktop app also needs Windows 10/11 with the .NET Framework 4.x compiler, which is built into Windows.
+You need Node.js 20+ (24 recommended), PostgreSQL 15+ (18 recommended) and a free Groq API key from console.groq.com. Without a Groq key, Murmur still works fully offline, just with lower accuracy. The desktop app also needs Windows 10/11 with the .NET Framework 4.x compiler, which is built into Windows.
 
 ```bash
 # 1. Backend: API on http://localhost:8000
 cd backend
 npm install
-cp .env.example .env          # set DATABASE_URL, DATABASE_ADMIN_URL, SECRET_KEY
+cp .env.example .env          # set DATABASE_URL, DATABASE_ADMIN_URL, SECRET_KEY, GROQ_API_KEY,
+                              # and ASR_PROVIDER=groq / LLM_PROVIDER=groq
 npm run db:setup              # creates the database role + database
-npm run seed                  # optional: demo@whisperflow.local / Demo12345
-npm run dev                   # applies migrations, downloads Whisper on first run
+npm run dev                   # applies migrations and starts the API
 
 # 2. Hub UI: hot reload on http://localhost:5173 (or `npm run build` and let the API serve it)
 cd ../frontend
 npm install
 npm run dev
 
-# 3. Desktop app: global shortcuts + Flow Bar
+# 3. Desktop app: global shortcuts + Murmur bar
 cd ../desktop
-npm install                   # also compiles FlowHelper.exe
+npm install                   # also compiles MurmurHelper.exe
 npm run dev                   # hub from Vite; use `npm start` for the API-served build
 ```
 
 Sign in from the desktop window, then hold `Ctrl + Win` in any app and speak.
 
-With Docker: `cp .env.example .env`, set the two secrets, then run `docker compose up --build` and open http://localhost:8000.
+With Docker: `cp .env.example .env`, set the secrets and your Groq key, then run `docker compose up --build` and open http://localhost:8000.
 
 See [DOCUMENTATION.md](DOCUMENTATION.md) for the architecture, database schema, API reference and configuration.
 
@@ -118,6 +120,8 @@ See [DOCUMENTATION.md](DOCUMENTATION.md) for the architecture, database schema, 
 
 **Authentication:** Sessions use JSON Web Tokens. "Log out everywhere" and password changes revoke every token immediately through a per-user token version.
 
-**Data isolation:** Every query is scoped to the signed-in user. Only what you share with your team (members, shared dictionary words and snippets) is visible to that team's members.
+**Data isolation:** Every query is scoped to the signed-in user.
 
-**Desktop:** The session token is encrypted with Windows DPAPI. The hub runs sandboxed with context isolation and talks to the desktop only through a small, validated IPC bridge. The microphone is opened only while you dictate.
+**Desktop:** The session token is encrypted with Windows DPAPI. The hub runs sandboxed with context isolation and talks to the desktop only through a small, validated IPC bridge. The microphone is opened only while you dictate, and the focused text box is read only for its name and the two characters before the cursor.
+
+**API keys:** Provider keys live only in `backend/.env`, which git ignores.

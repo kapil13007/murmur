@@ -1,17 +1,17 @@
 // File: desktop/helper/build.js
-// Compiles FlowHelper.cs with the C# compiler that ships with Windows
+// Compiles MurmurHelper.cs with the C# compiler that ships with Windows
 // (.NET Framework 4.x), so no Visual Studio or .NET SDK is required.
 const fs = require('node:fs');
 const path = require('node:path');
 const { execFileSync } = require('node:child_process');
 
 const here = __dirname;
-const source = path.join(here, 'FlowHelper.cs');
+const source = path.join(here, 'MurmurHelper.cs');
 const outDir = path.join(here, 'bin');
-const output = path.join(outDir, 'FlowHelper.exe');
+const output = path.join(outDir, 'MurmurHelper.exe');
 
 if (process.platform !== 'win32') {
-  console.log('[helper] Skipping FlowHelper build: it is Windows-only.');
+  console.log('[helper] Skipping MurmurHelper build: it is Windows-only.');
   process.exit(0);
 }
 
@@ -26,7 +26,7 @@ if (!framework) {
 
 // Skip the rebuild when the exe is newer than the source.
 if (fs.existsSync(output) && fs.statSync(output).mtimeMs >= fs.statSync(source).mtimeMs && !process.argv.includes('--force')) {
-  console.log('[helper] FlowHelper.exe is up to date.');
+  console.log('[helper] MurmurHelper.exe is up to date.');
   process.exit(0);
 }
 
@@ -47,6 +47,6 @@ try {
   execFileSync(path.join(framework, 'csc.exe'), args, { stdio: 'inherit' });
   console.log(`[helper] Built ${path.relative(process.cwd(), output)}`);
 } catch {
-  console.error('[helper] Compiling FlowHelper.cs failed (see errors above).');
+  console.error('[helper] Compiling MurmurHelper.cs failed (see errors above).');
   process.exit(1);
 }

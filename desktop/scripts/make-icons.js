@@ -1,5 +1,5 @@
 // File: desktop/scripts/make-icons.js
-// Draws the Flow logo (frontend/public/logo.svg: a rounded square with four
+// Draws the Murmur logo (frontend/public/logo.svg: a rounded square with four
 // rounded bars) into the PNG/ICO files the desktop app needs. Pure Node, no
 // image libraries: shapes are rasterised with 4x4 supersampling.
 //

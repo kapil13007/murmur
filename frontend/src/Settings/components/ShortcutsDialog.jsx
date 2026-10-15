@@ -100,10 +100,10 @@ export default function ShortcutsDialog({ onClose }) {
   const overlap = handsFreeKeys.length && handsFreeKeys.length < pttKeys.length && handsFreeKeys.every((k) => pttKeys.includes(k));
 
   return (
-    <Modal isOpen onClose={() => (capturing ? setCapturing(null) : onClose())} title="Shortcuts" subtitle="Choose your preferred shortcuts for using Flow." size="xl">
+    <Modal isOpen onClose={() => (capturing ? setCapturing(null) : onClose())} title="Shortcuts" subtitle="Choose your preferred shortcuts for using Murmur." size="xl">
       {!isDesktop && (
         <p className="mb-4 rounded-xl bg-subtle px-4 py-2.5 text-xs text-muted">
-          Global shortcuts run in the Whisper Flow desktop app. Browsers can&apos;t see the Windows key, so set Win-key combos from the desktop app.
+          Global shortcuts run in the Murmur desktop app. Browsers can&apos;t see the Windows key, so set Win-key combos from the desktop app.
         </p>
       )}
       <div className="divide-y divide-line rounded-2xl border border-line">

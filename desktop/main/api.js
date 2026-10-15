@@ -42,7 +42,7 @@ async function request(pathname, { method = 'GET', json, form, signal, timeoutMs
     });
   } catch (err) {
     if (err.name === 'AbortError' && signal?.aborted) throw err;
-    throw new ApiError("Can't reach the Whisper Flow server. Is the backend running?", 0);
+    throw new ApiError("Can't reach the Murmur server. Is the backend running?", 0);
   }
   const text = await res.text();
   let data;
@@ -53,7 +53,7 @@ async function request(pathname, { method = 'GET', json, form, signal, timeoutMs
   }
   if (res.status === 401) {
     onUnauthorized();
-    throw new ApiError('Your session expired. Sign in again from the Flow hub.', 401, data);
+    throw new ApiError('Your session expired. Sign in again from the Murmur window.', 401, data);
   }
   if (!res.ok) throw new ApiError(data?.detail || `Request failed (${res.status})`, res.status, data);
   return data;

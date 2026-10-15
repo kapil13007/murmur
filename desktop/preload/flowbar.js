@@ -1,5 +1,5 @@
 // File: desktop/preload/flowbar.js
-// Exposes `window.flowBar` to the Flow Bar renderer (see main/flowbar.js for
+// Exposes `window.flowBar` to the Murmur bar renderer (see main/flowbar.js for
 // the message protocol).
 const { contextBridge, ipcRenderer } = require('electron');
 

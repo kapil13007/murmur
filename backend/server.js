@@ -33,7 +33,7 @@ async function main() {
   startRetentionJob();
 
   const server = app.listen(settings.PORT, () => {
-    logger.info(`Whisper Flow API listening on http://localhost:${settings.PORT}`);
+    logger.info(`Murmur API listening on http://localhost:${settings.PORT}`);
   });
 
   const shutdown = (signal) => {

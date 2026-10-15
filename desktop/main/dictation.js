@@ -3,10 +3,10 @@
 //
 //   idle --(push_to_talk down | hands_free | command down)--> starting
 //   starting --(microphone open)--> recording
-//   recording --(release / press again / Flow Bar stop)--> processing
+//   recording --(release / press again / Murmur bar stop)--> processing
 //   processing --(text pasted | error)--> idle
-//   any --(Esc / Flow Bar cancel)--> idle
-const { app, clipboard, Notification } = require('electron');
+//   any --(Esc / Murmur bar cancel)--> idle
+const { app, clipboard } = require('electron');
 const api = require('./api');
 const helper = require('./helper');
 const bar = require('./flowbar');
@@ -15,6 +15,23 @@ const { pasteText, readSelection } = require('./clipboard');
 const { MAX_RECORDING_MS, MIN_RECORDING_MS } = require('./config');
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// Back-to-back dictations need a space between them: "...the transcript." +
+// "Kapil" must become "...the transcript. Kapil". `before` is what the helper
+// read just before the caret (null when the app doesn't expose its text); in
+// that case a dictation that follows our own paste into the same window
+// within a minute is treated as a continuation.
+const NO_SPACE_AFTER = /[\s([{"'“‘/@#-]$/;
+const NO_SPACE_BEFORE = /^[\s,.;:!?)\]}'"”’]/;
+
+function withLeadingSpace(text, context, lastPaste) {
+  if (!text || NO_SPACE_BEFORE.test(text)) return text;
+  let previous = context.before;
+  if (previous == null && lastPaste && lastPaste.pid === context.pid && lastPaste.title === context.title && Date.now() - lastPaste.at < 60_000) {
+    previous = lastPaste.text;
+  }
+  return previous && !NO_SPACE_AFTER.test(previous) ? ` ${text}` : text;
+}
 
 class DictationController {
   constructor() {
@@ -28,6 +45,7 @@ class DictationController {
     this.abort = null;
     this.muted = false;
     this.contextPromise = null;
+    this.lastPaste = null; // { pid, title, text, at } of the last dictation we pasted
     this.hotkeyListeners = new Set();
     this.showHub = () => {};
   }
@@ -125,7 +143,7 @@ class DictationController {
   // --- recording -------------------------------------------------------------
   async start(mode) {
     if (!api.hasSession()) {
-      this.flash('error', 'Sign in to Whisper Flow to start dictating');
+      this.flash('error', 'Sign in to Murmur to start dictating');
       this.showHub();
       return;
     }
@@ -136,8 +154,9 @@ class DictationController {
     this.startedAt = Date.now();
     helper.setRecording(true);
     this.showBarState();
-    // Look up the app being dictated into while the user is talking.
-    this.contextPromise = this.prefs?.context_awareness === false ? Promise.resolve(null) : helper.foreground();
+    // Look up the app and text box being dictated into while the user is
+    // talking. It stays on this machine unless context awareness is on.
+    this.contextPromise = helper.foreground();
     try {
       await bar.startRecording({
         deviceId: this.prefs?.microphone_device_id || null,
@@ -222,11 +241,13 @@ class DictationController {
     }
 
     const context = (await this.contextPromise) || {};
+    const shareContext = this.prefs?.context_awareness !== false;
     const fields = {
       mode,
-      app_name: context.app,
-      url: context.url,
-      window_title: context.title,
+      app_name: shareContext ? context.app : undefined,
+      url: shareContext ? context.url : undefined,
+      window_title: shareContext ? context.title : undefined,
+      field_name: shareContext ? context.field : undefined,
       device_uid: store.deviceUid(),
       mic_device: this.prefs?.microphone_label,
       app_version: app.getVersion(),
@@ -235,66 +256,65 @@ class DictationController {
     };
     this.abort = new AbortController();
     try {
-      if (mode === 'command') await this.runCommand(audio, fields);
-      else await this.runDictation(audio, fields);
+      if (mode === 'command') await this.runCommand(audio, fields, context);
+      else await this.runDictation(audio, fields, context);
     } catch (err) {
       if (err.name === 'AbortError') return; // cancelled with Esc
       this.reset();
       this.sound('error');
-      if (err.status === 402) {
-        this.flash('error', err.message, 5000);
-        new Notification({ title: 'Weekly word limit reached', body: err.message }).show();
-      } else {
-        this.flash('error', err.message || 'Something went wrong', 4000);
-      }
+      this.flash('error', err.message || 'Something went wrong', 4000);
     }
   }
 
-  async runDictation(audio, fields) {
+  async runDictation(audio, fields, context) {
     const result = await api.transcribe(audio.wav, fields, this.abort.signal);
     if (this.state !== 'processing') return;
     if (result.status !== 'success' || !result.text) {
       this.reset();
-      this.flash('error', result.message || "Flow didn't catch that");
+      this.flash('error', result.message || "Murmur didn't catch that");
       return;
     }
-    await this.paste(result.text);
+    await this.paste(result.text, context);
     this.reset();
     this.flash('success', '', 900);
   }
 
-  async runCommand(audio, fields) {
+  async runCommand(audio, fields, context) {
     // The selection is read now that the user has let go of the keys.
     const selected = helper.ready ? await readSelection(() => helper.copy()) : '';
     const result = await api.command(audio.wav, { ...fields, selected_text: selected }, this.abort.signal);
     if (this.state !== 'processing') return;
     if (result.status !== 'success' || !result.output) {
       this.reset();
-      this.flash('error', result.message || "Flow didn't catch that command");
+      this.flash('error', result.message || "Murmur didn't catch that command");
       return;
     }
-    await this.paste(result.output);
+    // A rewrite replaces the selection as-is; new text gets normal spacing.
+    await this.paste(result.output, selected ? null : context);
     this.reset();
     this.flash('success', selected ? 'Rewrote your selection' : '', 1400);
   }
 
   // --- output ----------------------------------------------------------------
-  async paste(text) {
+  // context: what the helper saw at the cursor (for spacing), or null.
+  async paste(text, context = null) {
+    const typed = context ? withLeadingSpace(text, context, this.lastPaste) : text;
     if (!helper.ready) {
       // No native helper (or not on Windows): leave the text on the clipboard.
-      await clipboard.writeText(text);
+      await clipboard.writeText(typed);
       bar.toast('Copied - press Ctrl+V to paste');
       return;
     }
-    await pasteText(text, () => helper.paste());
+    await pasteText(typed, () => helper.paste());
+    if (context) this.lastPaste = { pid: context.pid, title: context.title, text, at: Date.now() };
   }
 
   async pasteLast() {
     if (this.state !== 'idle') return;
     try {
-      const last = await api.lastTranscript();
+      const [last, context] = await Promise.all([api.lastTranscript(), helper.foreground()]);
       await sleep(80);
-      await this.paste(last.text);
+      await this.paste(last.text, context || null);
     } catch (err) {
       this.flash('error', err.status === 404 ? 'Nothing dictated yet' : err.message);
     }
@@ -312,3 +332,4 @@ class DictationController {
 }
 
 module.exports = new DictationController();
+module.exports.withLeadingSpace = withLeadingSpace; // exported for tests

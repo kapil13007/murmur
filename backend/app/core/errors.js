@@ -19,7 +19,6 @@ export class HttpError extends Error {
 
 export const badRequest = (detail, opts) => new HttpError(400, detail, opts);
 export const unauthorized = (detail = 'Could not validate credentials', opts) => new HttpError(401, detail, opts);
-export const paymentRequired = (detail, opts) => new HttpError(402, detail, opts);
 export const forbidden = (detail = 'You do not have access to this resource', opts) => new HttpError(403, detail, opts);
 export const notFound = (detail = 'Not found', opts) => new HttpError(404, detail, opts);
 export const conflict = (detail, opts) => new HttpError(409, detail, opts);

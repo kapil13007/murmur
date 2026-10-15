@@ -10,7 +10,6 @@ export const RegisterRequest = z.object({
   password: passwordSchema,
   first_name: name,
   last_name: z.string().trim().max(100).optional().nullable(),
-  referral_code: z.string().trim().max(20).optional().nullable(),
   timezone: z.string().max(64).optional(),
 });
 

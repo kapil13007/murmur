@@ -51,7 +51,6 @@ export function initUserPreference(sequelize) {
       notification_settings: { type: DataTypes.JSONB, allowNull: false },
       theme: { type: DataTypes.STRING(10), allowNull: false, defaultValue: 'light', validate: { isIn: [THEMES] } },
       dictionary_sort: { type: DataTypes.STRING(20), allowNull: false, defaultValue: 'newest' },
-      notes_view: { type: DataTypes.STRING(10), allowNull: false, defaultValue: 'grid' },
       flow_bar_position: { type: DataTypes.STRING(10), allowNull: false, defaultValue: 'bottom' },
       user_information: { type: DataTypes.JSONB, allowNull: false, defaultValue: () => ({}) },
       typing_locations: { type: DataTypes.ARRAY(DataTypes.STRING(50)), allowNull: false, defaultValue: [] },

@@ -10,7 +10,7 @@ function SnippetsBanner() {
       <div>
         <p className="font-display text-[26px] leading-tight text-ink">The stuff you shouldn&apos;t have to re-type.</p>
         <p className="mt-1.5 max-w-md text-sm text-muted">
-          Save shortcuts for things you say often. Say the trigger while dictating and Flow pastes the full text — links,
+          Save shortcuts for things you say often. Say the trigger while dictating and Murmur pastes the full text — links,
           addresses, sign-offs, prompts.
         </p>
       </div>
@@ -19,7 +19,7 @@ function SnippetsBanner() {
           You say <span className="font-semibold text-ink">&ldquo;my calendar link&rdquo;</span>
         </p>
         <p className="mt-1 text-muted">
-          Flow types <span className="font-semibold text-fathom-800 dark:text-fathom-300">cal.com/you/30min</span>
+          Murmur types <span className="font-semibold text-fathom-800 dark:text-fathom-300">cal.com/you/30min</span>
         </p>
       </div>
     </div>

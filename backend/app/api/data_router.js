@@ -10,7 +10,7 @@ const router = Router();
 router.get('/export', async (req, res) => {
   const data = await exportUserData(req.user);
   const stamp = new Date().toISOString().slice(0, 10);
-  res.set('Content-Disposition', `attachment; filename="whisper-flow-export-${stamp}.json"`);
+  res.set('Content-Disposition', `attachment; filename="murmur-export-${stamp}.json"`);
   res.json(data);
 });
 

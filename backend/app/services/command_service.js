@@ -1,13 +1,12 @@
 // File: app/services/command_service.js
-// Command Mode: hold the command shortcut, speak an instruction, and Flow
+// Command Mode: hold the command shortcut, speak an instruction, and Murmur
 // rewrites the selected text (or writes new text at the cursor).
-import { HttpError, forbidden, paymentRequired } from '../core/errors.js';
+import { HttpError, forbidden } from '../core/errors.js';
 import { createTranscript } from '../crud/transcript_crud.js';
 import { createCommandRun } from '../crud/transform_crud.js';
 import { getPreferences } from '../crud/preference_crud.js';
 import { languageHint, transcribe } from './asr/index.js';
 import { hasSpeech } from './audio/wav.js';
-import { getSubscriptionSummary } from './billing_service.js';
 import { decodeUpload } from './dictation_service.js';
 import { applyRules } from './formatting/rules.js';
 import { countWords } from './formatting/text_utils.js';
@@ -16,12 +15,6 @@ import { runTextInstruction } from './text_instruction_service.js';
 export async function runCommand(user, file, meta) {
   const prefs = await getPreferences(user.id);
   if (!prefs.command_mode_enabled) throw forbidden('Command Mode is turned off in Settings > System.');
-  const subscription = await getSubscriptionSummary(user.id);
-  if (!subscription.is_pro) {
-    throw paymentRequired('Command Mode is a Flow Pro feature. Upgrade to use voice commands on your text.', {
-      code: 'pro_required',
-    });
-  }
 
   let instruction = meta.instruction?.trim() || '';
   let transcriptId = null;
@@ -40,7 +33,7 @@ export async function runCommand(user, file, meta) {
       speechSeconds: audio.analysis.speechSeconds,
     });
     instruction = applyRules(asr.text, { cleanupLevel: 'light', style: 'formal', smartFormatting: false });
-    if (!instruction) return { status: 'empty', output: '', message: "Flow couldn't make out the command." };
+    if (!instruction) return { status: 'empty', output: '', message: "Murmur couldn't make out the command." };
     if (prefs.data_retention !== 'never_store') {
       const transcript = await createTranscript({
         user_id: user.id,

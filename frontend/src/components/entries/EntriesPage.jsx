@@ -5,7 +5,6 @@ import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { ArrowDownUp, Plus, Upload } from 'lucide-react';
 import { errorMessage } from '../../api/apiClient';
-import { useApp } from '../../context/AppContext';
 import { useDebounce } from '../../hooks/useDebounce';
 import { onServerEvent } from '../../hooks/useServerEvents';
 import ConfirmModal from '../ui/ConfirmModal';
@@ -13,7 +12,6 @@ import EmptyState from '../ui/EmptyState';
 import Menu from '../ui/Menu';
 import SearchInput from '../ui/SearchInput';
 import Spinner from '../ui/Spinner';
-import Tabs from '../ui/Tabs';
 import BulkBar from './BulkBar';
 import EntryRow from './EntryRow';
 import ImportModal from './ImportModal';
@@ -30,10 +28,8 @@ const SORTS = [
  */
 export default function EntriesPage({ config }) {
   const { api, title, noun, banner, emptyIcon, EntryModal, importHelp } = config;
-  const { hasTeam } = useApp();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [scope, setScope] = useState('all');
   const [sort, setSort] = useState('newest');
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState(new Set());
@@ -45,11 +41,11 @@ export default function EntriesPage({ config }) {
   const load = useCallback(
     () =>
       api
-        .list({ scope, sort, search: debouncedSearch || undefined })
+        .list({ sort, search: debouncedSearch || undefined })
         .then((res) => setItems(res.items))
         .catch((err) => toast.error(errorMessage(err)))
         .finally(() => setLoading(false)),
-    [api, scope, sort, debouncedSearch],
+    [api, sort, debouncedSearch],
   );
 
   useEffect(() => {
@@ -57,11 +53,7 @@ export default function EntriesPage({ config }) {
   }, [load]);
   useEffect(() => onServerEvent('dictionary.changed', () => load()), [load]);
 
-  // Changing the filter clears any bulk selection.
-  const changeScope = (next) => {
-    setScope(next);
-    setSelected(new Set());
-  };
+  // Changing the search clears any bulk selection.
   const changeSearch = (next) => {
     setSearch(next);
     setSelected(new Set());
@@ -97,17 +89,6 @@ export default function EntriesPage({ config }) {
     }
   };
 
-  const setShared = async (ids, shared) => {
-    try {
-      const res = shared ? await api.share(ids) : await api.unshare(ids);
-      toast.success(shared ? `Shared ${res.changed} ${noun}${res.changed === 1 ? '' : 's'} with team` : 'Made personal');
-      setSelected(new Set());
-      load();
-    } catch (err) {
-      toast.error(errorMessage(err));
-    }
-  };
-
   const remove = async (ids) => {
     const res = await api.bulkDelete(ids);
     toast.success(`Deleted ${res.deleted} ${noun}${res.deleted === 1 ? '' : 's'}`);
@@ -132,17 +113,7 @@ export default function EntriesPage({ config }) {
 
       {banner}
 
-      <div className="mt-8 flex flex-wrap items-end justify-between gap-3">
-        <Tabs
-          value={scope}
-          onChange={changeScope}
-          tabs={[
-            { id: 'all', label: 'All' },
-            { id: 'personal', label: 'Personal' },
-            { id: 'team', label: 'Shared with team' },
-          ]}
-          className="flex-1 border-b-0"
-        />
+      <div className="mt-8 flex flex-wrap items-end justify-end gap-3">
         <div className="flex items-center gap-2 pb-1">
           <SearchInput value={search} onChange={changeSearch} placeholder={`Search your ${noun === 'word' ? 'vocabulary' : 'snippets'}`} className="w-60" />
           <Menu
@@ -171,18 +142,10 @@ export default function EntriesPage({ config }) {
         ) : !items.length ? (
           <EmptyState
             icon={emptyIcon}
-            title={search ? 'No results found' : scope === 'team' ? 'Nothing shared yet' : `No ${noun}s yet`}
-            body={
-              search
-                ? `No ${noun}s match your search.`
-                : scope === 'team'
-                  ? hasTeam
-                    ? `Share a ${noun} with your team and everyone's dictation will use it.`
-                    : 'Create or join a team in Settings > Team to share with teammates.'
-                  : `Add your first ${noun} to get started.`
-            }
+            title={search ? 'No results found' : `No ${noun}s yet`}
+            body={search ? `No ${noun}s match your search.` : `Add your first ${noun} to get started.`}
             action={
-              !search && scope !== 'team' ? (
+              !search ? (
                 <button className="btn-primary" onClick={() => setModal({ mode: 'add' })}>
                   <Plus size={16} /> Add {noun}
                 </button>
@@ -196,13 +159,11 @@ export default function EntriesPage({ config }) {
                 key={entry.id}
                 entry={entry}
                 noun={noun}
-                hasTeam={hasTeam}
                 selected={selected.has(entry.id)}
                 selectionMode={selected.size > 0}
                 onSelect={() => toggleSelect(entry.id)}
                 onStar={() => toggleStar(entry)}
                 onEdit={() => setModal({ mode: 'edit', entry })}
-                onShare={(shared) => setShared([entry.id], shared)}
                 onDelete={() => setConfirm([entry.id])}
               />
             ))}
@@ -211,16 +172,9 @@ export default function EntriesPage({ config }) {
         {items.length > 0 && <p className="mt-3 text-right text-xs text-faint">{items.length} {noun}{items.length === 1 ? '' : 's'}</p>}
       </div>
 
-      <BulkBar
-        count={selected.size}
-        noun={noun}
-        hasTeam={hasTeam}
-        onClear={() => setSelected(new Set())}
-        onDelete={() => setConfirm([...selected])}
-        onShare={() => setShared([...selected], true)}
-      />
+      <BulkBar count={selected.size} noun={noun} onClear={() => setSelected(new Set())} onDelete={() => setConfirm([...selected])} />
 
-      {modal && <EntryModal isOpen mode={modal.mode} entry={modal.entry} hasTeam={hasTeam} onClose={() => setModal(null)} onSave={save} />}
+      {modal && <EntryModal isOpen mode={modal.mode} entry={modal.entry} onClose={() => setModal(null)} onSave={save} />}
       <ImportModal
         isOpen={importing}
         noun={noun}

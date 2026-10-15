@@ -43,7 +43,6 @@ const notificationSchema = z.object({
   tips_and_suggestions: z.boolean().optional(),
   feature_highlights: z.boolean().optional(),
   milestones_and_progress: z.boolean().optional(),
-  team_updates: z.boolean().optional(),
 });
 
 export const UpdatePreferencesRequest = z
@@ -73,7 +72,6 @@ export const UpdatePreferencesRequest = z
     notification_settings: notificationSchema,
     theme: z.enum(THEMES),
     dictionary_sort: z.enum(['newest', 'oldest', 'alphabetical', 'starred']),
-    notes_view: z.enum(['grid', 'list']),
     flow_bar_position: z.enum(['bottom', 'top']),
   })
   .partial()

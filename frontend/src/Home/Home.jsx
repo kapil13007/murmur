@@ -1,23 +1,20 @@
 // File: src/Home/Home.jsx
-// Wispr's "Dictation" home: greeting + stat pills, the dictation card and
-// the full dictation history (search, archive, edit, retry, play audio).
+// Home: greeting + stat pills, the dictation card and the full dictation
+// history (search, archive, edit, retry, play audio).
 import { useCallback, useEffect, useState } from 'react';
-import { getStatsSummary, getWeeklyUsage } from '../api/apiClient';
+import { getStatsSummary } from '../api/apiClient';
 import { useApp } from '../context/AppContext';
 import { onServerEvent } from '../hooks/useServerEvents';
 import DictationCard from './components/DictationCard';
 import HistorySection from './components/HistorySection';
 import StatsPills from './components/StatsPills';
-import UsageBar from './components/UsageBar';
 
 export default function Home() {
-  const { user, subscription } = useApp();
+  const { user } = useApp();
   const [stats, setStats] = useState(null);
-  const [usage, setUsage] = useState(null);
 
   const loadStats = useCallback(() => {
     getStatsSummary().then(setStats).catch(() => {});
-    getWeeklyUsage().then(setUsage).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -36,9 +33,8 @@ export default function Home() {
         <StatsPills stats={stats} />
       </header>
 
-      <div className="mt-8 space-y-4">
+      <div className="mt-8">
         <DictationCard onDictated={loadStats} />
-        {subscription && !subscription.is_pro && usage && <UsageBar usage={usage} />}
       </div>
 
       <HistorySection />

@@ -20,14 +20,14 @@ export default function ShortcutStep() {
         <p className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-ink">
           {pressed ? (
             <>
-              <CheckCircle2 size={16} className="text-fathom-700" /> Nice — Flow heard your shortcut.
+              <CheckCircle2 size={16} className="text-fathom-700" /> Nice — Murmur heard your shortcut.
             </>
           ) : (
             'Try pressing it now.'
           )}
         </p>
       ) : (
-        <p className="mt-4 text-sm text-muted">Shortcuts work everywhere once the Whisper Flow desktop app is running. You can change them in Settings &gt; General.</p>
+        <p className="mt-4 text-sm text-muted">Shortcuts work everywhere once the Murmur desktop app is running. You can change them in Settings &gt; General.</p>
       )}
     </div>
   );

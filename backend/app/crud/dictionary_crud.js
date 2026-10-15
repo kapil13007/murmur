@@ -1,13 +1,7 @@
 // File: app/crud/dictionary_crud.js
 // Vocabulary and snippets share this table; `isSnippet` selects the view.
 import { Op, Sequelize } from 'sequelize';
-import { DictionaryEntry, User } from '../models/index.js';
-
-function visibleWhere(userId, teamId, isSnippet) {
-  const scopes = [{ user_id: userId }];
-  if (teamId) scopes.push({ team_id: teamId });
-  return { is_snippet: isSnippet, [Op.or]: scopes };
-}
+import { DictionaryEntry } from '../models/index.js';
 
 const SORTS = {
   newest: [['created_at', 'DESC']],
@@ -19,33 +13,19 @@ const SORTS = {
   ],
 };
 
-export function listEntries(userId, teamId, { isSnippet, search, scope = 'all', sort = 'newest' }) {
-  const where = visibleWhere(userId, teamId, isSnippet);
-  if (scope === 'personal') {
-    delete where[Op.or];
-    where.user_id = userId;
-    where.team_id = null;
-  } else if (scope === 'team') {
-    delete where[Op.or];
-    where.team_id = teamId || '00000000-0000-0000-0000-000000000000';
-  }
+export function listEntries(userId, { isSnippet, search, sort = 'newest' }) {
+  const where = { user_id: userId, is_snippet: isSnippet };
   if (search) {
     const pattern = `%${search.replace(/[%_\\]/g, (c) => `\\${c}`)}%`;
     where[Op.and] = [{ [Op.or]: [{ phrase: { [Op.iLike]: pattern } }, { replacement: { [Op.iLike]: pattern } }] }];
   }
-  return DictionaryEntry.findAll({
-    where,
-    include: [{ model: User, as: 'owner', attributes: ['id', 'first_name', 'last_name'] }],
-    order: SORTS[sort] || SORTS.newest,
-  });
+  return DictionaryEntry.findAll({ where, order: SORTS[sort] || SORTS.newest });
 }
 
 // Everything the formatter needs for one user in a single query.
-export async function getFormattingEntries(userId, teamId) {
-  const scopes = [{ user_id: userId }];
-  if (teamId) scopes.push({ team_id: teamId });
+export async function getFormattingEntries(userId) {
   const rows = await DictionaryEntry.findAll({
-    where: { [Op.or]: scopes },
+    where: { user_id: userId },
     attributes: ['id', 'phrase', 'replacement', 'is_snippet'],
     raw: true,
   });
@@ -56,8 +36,8 @@ export async function getFormattingEntries(userId, teamId) {
   };
 }
 
-export function getVisibleEntry(userId, teamId, id, isSnippet) {
-  return DictionaryEntry.findOne({ where: { id, ...visibleWhere(userId, teamId, isSnippet) } });
+export function getOwnEntry(userId, id, isSnippet) {
+  return DictionaryEntry.findOne({ where: { id, user_id: userId, is_snippet: isSnippet } });
 }
 
 export function findByPhrase(userId, phrase, isSnippet) {

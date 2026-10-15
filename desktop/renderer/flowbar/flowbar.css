@@ -1,5 +1,5 @@
 /* File: desktop/renderer/flowbar/flowbar.css
-   The Flow Bar: a small pill that grows into a waveform while Flow listens. */
+   The Murmur bar: a small pill that grows into a waveform while Murmur listens. */
 :root {
   --pill-bg: rgba(22, 22, 22, 0.93);
   --pill-idle-bg: rgba(22, 22, 22, 0.72);

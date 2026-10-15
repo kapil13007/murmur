@@ -8,14 +8,11 @@ export const STYLE_CATEGORIES = ['personal', 'work', 'email', 'other'];
 export const DATA_RETENTION = ['store', 'auto_delete_24h', 'never_store'];
 export const THEMES = ['light', 'dark', 'system'];
 
-export const PLANS = { BASIC: 'FLOW_BASIC', PRO: 'FLOW_PRO', TEAMS: 'FLOW_TEAMS' };
-export const SUBSCRIPTION_STATUSES = ['none', 'trialing', 'active', 'past_due', 'canceled'];
-
 export const TRANSCRIPT_STATUSES = ['success', 'empty', 'no_audio', 'error', 'dismissed'];
 export const DICTATION_MODES = ['push_to_talk', 'hands_free', 'command', 'web', 'retry'];
 
 export const DICTIONARY_SOURCES = ['manual', 'auto_learned', 'import', 'default'];
-export const NOTIFICATION_TYPES = ['milestone', 'tip', 'team', 'usage', 'feature', 'system', 'learning', 'billing'];
+export const NOTIFICATION_TYPES = ['milestone', 'tip', 'feature', 'system', 'learning'];
 
 export const SHORTCUT_ACTIONS = ['push_to_talk', 'hands_free', 'command_mode', 'paste_last', 'copy_last', 'cancel'];
 

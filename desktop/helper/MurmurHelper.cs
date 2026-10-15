@@ -1,11 +1,12 @@
-// FlowHelper.cs - native companion process for the Whisper Flow desktop app
+// MurmurHelper.cs - native companion process for the Murmur desktop app
 // (the equivalent of Wispr Flow's "Wispr Flow Helper.exe").
 //
 // Electron cannot see key *releases* globally, which push-to-talk needs, and
 // cannot synthesize Ctrl+V into other apps. This helper does both:
 //   * a low-level keyboard hook that matches the user's shortcut bindings and
 //     reports hold (down/up) and press events,
-//   * SendInput for paste / copy, foreground-app + browser-URL lookup, and
+//   * SendInput for paste / copy, foreground-app + browser-URL + focused-field
+//     lookup, and
 //     muting system audio while dictating.
 //
 // Protocol: one command per stdin line, tab separated ("paste\t17"); events and
@@ -21,8 +22,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Automation;
+using System.Windows.Automation.Text;
 
-namespace WhisperFlow
+namespace Murmur
 {
     internal static class Program
     {
@@ -129,9 +131,9 @@ namespace WhisperFlow
         private static LowLevelKeyboardProc hookProc; // kept alive for the GC
         private static IntPtr hookHandle = IntPtr.Zero;
 
-        // Test mode (FLOWHELPER_DEBUG=1): the hook also processes synthetic key
+        // Test mode (MURMURHELPER_DEBUG=1): the hook also processes synthetic key
         // events (except its own), so shortcuts can be exercised by a script.
-        private static readonly bool DebugMode = Environment.GetEnvironmentVariable("FLOWHELPER_DEBUG") == "1";
+        private static readonly bool DebugMode = Environment.GetEnvironmentVariable("MURMURHELPER_DEBUG") == "1";
 
         // ------------------------------------------------------------------
         // Key names <-> virtual-key codes
@@ -459,7 +461,49 @@ namespace WhisperFlow
             catch (Exception) { }
             if (processName != null && Browsers.Contains(processName)) url = TryGetBrowserUrl(hwnd, processName);
             return "\"process\":" + Q(processName) + ",\"app\":" + Q(appName) + ",\"title\":" + Q(title.ToString()) +
-                   ",\"url\":" + Q(url) + ",\"pid\":" + pid;
+                   ",\"url\":" + Q(url) + ",\"pid\":" + pid + FocusedField();
+        }
+
+        // ------------------------------------------------------------------
+        // The focused text box: its accessible name ("To recipients",
+        // "Subject", "Message Body") and the two characters before the caret,
+        // so dictations into an address field are formatted as addresses and
+        // back-to-back dictations get a space between them. Read-only.
+        // "before" is null when the app doesn't expose its text, "" at the
+        // start of an empty field.
+        // ------------------------------------------------------------------
+        private static string FocusedField()
+        {
+            var task = Task.Factory.StartNew(delegate
+            {
+                string name = null, before = null;
+                bool password = false;
+                try
+                {
+                    var element = AutomationElement.FocusedElement;
+                    if (element != null)
+                    {
+                        name = element.Current.Name;
+                        if (name != null && name.Length > 120) name = name.Substring(0, 120);
+                        password = element.Current.IsPassword;
+                        object pattern;
+                        if (!password && element.TryGetCurrentPattern(TextPattern.Pattern, out pattern))
+                        {
+                            var selection = ((TextPattern)pattern).GetSelection();
+                            if (selection != null && selection.Length > 0)
+                            {
+                                var range = selection[0].Clone();
+                                range.MoveEndpointByRange(TextPatternRangeEndpoint.End, range, TextPatternRangeEndpoint.Start);
+                                range.MoveEndpointByUnit(TextPatternRangeEndpoint.Start, TextUnit.Character, -2);
+                                before = range.GetText(2);
+                            }
+                        }
+                    }
+                }
+                catch (Exception) { }
+                return ",\"field\":" + Q(name) + ",\"before\":" + Q(before) + ",\"password\":" + (password ? "true" : "false");
+            });
+            return task.Wait(400) ? task.Result : ",\"field\":null,\"before\":null,\"password\":false";
         }
 
         // ------------------------------------------------------------------
@@ -608,7 +652,7 @@ namespace WhisperFlow
                     case "inject":
                     {
                         // Debug only: a key event the hook will see as user input.
-                        if (!DebugMode) throw new InvalidOperationException("inject requires FLOWHELPER_DEBUG=1");
+                        if (!DebugMode) throw new InvalidOperationException("inject requires MURMURHELPER_DEBUG=1");
                         var input = new INPUT { type = INPUT_KEYBOARD };
                         input.U.ki = new KEYBDINPUT { wVk = (ushort)int.Parse(args[2]), dwFlags = args[3] == "up" ? KEYEVENTF_KEYUP : 0 };
                         SendInput(1, new[] { input }, Marshal.SizeOf(typeof(INPUT)));

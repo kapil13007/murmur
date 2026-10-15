@@ -1,7 +1,7 @@
 // File: desktop/main/index.js
 // Electron entry point. Wires the native helper's global shortcuts to the
 // dictation controller, keeps the session in step with the hub, and applies
-// the user's desktop preferences (Flow Bar, sounds, taskbar, start at login).
+// the user's desktop preferences (Murmur bar, sounds, taskbar, start at login).
 const { app, globalShortcut, ipcMain, Notification, session } = require('electron');
 
 if (!app.requestSingleInstanceLock()) {
@@ -74,7 +74,7 @@ if (!app.requestSingleInstanceLock()) {
     try {
       applyPreferences(await api.updatePreferences(patch));
     } catch (err) {
-      new Notification({ title: 'Whisper Flow', body: `Couldn't save that setting: ${err.message}` }).show();
+      new Notification({ title: 'Murmur', body: `Couldn't save that setting: ${err.message}` }).show();
     }
   }
 
@@ -171,7 +171,7 @@ if (!app.requestSingleInstanceLock()) {
     captureWaiter = null;
   });
 
-  // --- IPC: Flow Bar -------------------------------------------------------
+  // --- IPC: Murmur bar -------------------------------------------------------
   ipcMain.on('bar:action', (event, action) => {
     if (!fromBar(event)) return;
     if (action === 'start') dictation.onHotkey('hands_free', 'press');
@@ -189,9 +189,9 @@ if (!app.requestSingleInstanceLock()) {
   app.on('will-quit', () => globalShortcut.unregisterAll());
 
   app.whenReady().then(() => {
-    app.setAppUserModelId('com.prem.whisperflow');
+    app.setAppUserModelId('com.prem.murmur');
 
-    // Microphone for the Flow Bar recorder (file://) and the hub's in-page
+    // Microphone for the Murmur bar recorder (file://) and the hub's in-page
     // dictation; clipboard writes for the hub's copy buttons. Nothing else.
     const hubOrigin = new URL(config.HUB_URL).origin;
     const trusted = (url) => url.startsWith('file://') || url.startsWith(`${hubOrigin}/`) || url === hubOrigin;
@@ -220,7 +220,7 @@ if (!app.requestSingleInstanceLock()) {
       if (now === recording) return;
       recording = now;
       updateTray({ recording });
-      // Without the helper, Esc is only grabbed while Flow is listening.
+      // Without the helper, Esc is only grabbed while Murmur is listening.
       if (fallbackShortcuts && recording) globalShortcut.register('Escape', () => dictation.cancel());
       else if (fallbackShortcuts) globalShortcut.unregister('Escape');
     });

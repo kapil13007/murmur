@@ -2,10 +2,36 @@
 // Deterministic, offline transcript cleanup. Used on its own when no LLM is
 // configured, and as the fallback when the LLM is slow or unavailable.
 //
-// Pipeline (see applyRules): spoken commands -> times -> fillers -> stutters
-// -> self-corrections -> lists -> punctuation -> capitalisation -> style
-// -> email layout.
+// Pipeline (see applyRules): spoken commands -> addresses -> times -> fillers
+// -> stutters -> self-corrections -> lists -> punctuation -> capitalisation
+// -> style -> email layout. Email and web addresses are masked while the
+// sentence rules run, so nothing capitalises, splits or punctuates them.
+import { isAddressToken, normalizeAddresses } from './addresses.js';
 import { COMMON_WORDS, capitalizeFirst, normalizeWhitespace, squash } from './text_utils.js';
+
+// ---------------------------------------------------------------------------
+// Address masking: "kapil@gmail.com" -> an opaque placeholder made of
+// private-use characters (no letters, digits or dots for the rules to touch).
+// ---------------------------------------------------------------------------
+const MASK_OPEN = '';
+const MASK_CLOSE = '';
+const MASK_RE = /([-])/g;
+
+export function maskAddresses(text) {
+  const saved = [];
+  const masked = text.replace(/\S+/g, (word) => {
+    const lead = word.match(/^["'(]*/)[0];
+    const trail = word.slice(lead.length).match(/[.,;:!?)"']+$/)?.[0] || '';
+    const core = word.slice(lead.length, word.length - trail.length);
+    if (!core || !isAddressToken(core) || saved.length >= 0xe00) return word;
+    saved.push(core);
+    return `${lead}${MASK_OPEN}${String.fromCharCode(0xe100 + saved.length - 1)}${MASK_CLOSE}${trail}`;
+  });
+  return {
+    text: masked,
+    restore: (t) => t.replace(MASK_RE, (m, code) => saved[code.charCodeAt(0) - 0xe100] ?? m),
+  };
+}
 
 // ---------------------------------------------------------------------------
 // Spoken commands: "new line", "new paragraph", "question mark", ...
@@ -131,14 +157,18 @@ const VALUE_TYPES = [
   ['month', String.raw`(?:january|february|march|april|may|june|july|august|september|october|november|december)(?:\s+\d{1,2}(?:st|nd|rd|th)?)?`],
   ['number', String.raw`\$?\d+(?:[.,]\d+)?%?`],
 ];
-const CUES = String.raw`(?:no,?\s+wait|wait,?\s+no|no|sorry|actually|i mean|or rather|wait|make that|make it|i meant)`;
+const CUE = String.raw`(?:no,?\s+wait|wait,?\s+no|no|sorry|actually|i mean|or rather|wait|make that|make it|i meant|change (?:it|that) to)`;
+// Cues stack up in speech: "actually make it 4pm", "no wait, make that Friday".
+const CUES = String.raw`(?:${CUE}(?:[,.]?\s+${CUE}){0,2})`;
 const INTERJECTIONS = new Set(['actually', 'no', 'oh', 'wait', 'sorry', 'okay', 'ok', 'um', 'uh', 'oops', 'so', 'well']);
 
 // Splits into sentences and newline runs, keeping every character: a line
-// without terminal punctuation still ends at its newline.
+// without terminal punctuation still ends at its newline. A "." inside a word
+// ("3.5", "Node.js", "e.g") is not a sentence end; only one followed by a
+// space, a closing quote or the end of the text is.
 function splitSentences(text) {
   const parts = [];
-  const re = /[^.!?\n]+(?:[.!?]+["')]*|(?=\n)|$)|[.!?]+|\n+/g;
+  const re = /(?:[^.!?\n]|[.!?](?=[^\s.!?"')\n]))+(?:[.!?]+["')]*|(?=\n)|$)|[.!?]+["')]*|\n+/g;
   let m;
   while ((m = re.exec(text)) !== null) {
     if (m[0] === '') {
@@ -177,6 +207,7 @@ function applySentenceCorrections(text) {
     String.raw`^\s*(?:actually|no|sorry|wait|oh|oops)[,!]?\s+(?:no[,!]?\s+)?(?:let's|let us|make it|make that|change it to|change that to|i meant|it should be|it's|we'll do|how about|do)?\s*(?:do\s+)?(${anyValue})(?:\s+instead)?\s*[.!]?\s*$`,
     'i',
   );
+  let changed = false;
   for (let k = 1; k < sentences.length; k++) {
     const m = sentences[k].match(followUp);
     if (!m) continue;
@@ -193,8 +224,10 @@ function applySentenceCorrections(text) {
     const last = hits[hits.length - 1];
     sentences[prevIndex] = prev.slice(0, last.index) + value + prev.slice(last.index + last[0].length);
     sentences[k] = '';
+    changed = true;
   }
-  return joinSentences(sentences);
+  // Re-joining normalises spacing, so only do it when something changed.
+  return changed ? joinSentences(sentences) : text;
 }
 
 // "Send it today. Actually, scratch that. Send it tomorrow." -> "Send it tomorrow."
@@ -338,13 +371,13 @@ function capitalizeCalendarWords(text) {
 // ---------------------------------------------------------------------------
 const endsWithList = (t) => /(?:^|\n)(?:\d+\.|-)\s[^\n]*$/.test(t);
 
-function ensureTerminalPunctuation(t, mark) {
+export function ensureTerminalPunctuation(t, mark) {
   if (!t || endsWithList(t)) return t;
   if (/[\p{L}\p{N})"']$/u.test(t)) return t + mark;
   return t;
 }
 
-function dropFinalPeriod(t) {
+export function dropFinalPeriod(t) {
   return t.replace(/(?<!\.)\.(["')]?)$/, '$1');
 }
 
@@ -420,6 +453,9 @@ export function applyRules(raw, { cleanupLevel = 'light', smartFormatting = true
   if (!english) return t;
 
   if (smartFormatting) t = applySpokenCommands(t);
+  t = normalizeAddresses(t);
+  const masked = maskAddresses(t);
+  t = masked.text;
   t = normalizeTimes(t);
   if (cleanupLevel !== 'none') {
     t = stripFillers(t);
@@ -434,5 +470,5 @@ export function applyRules(raw, { cleanupLevel = 'light', smartFormatting = true
     t = applyStyle(t, style);
     if (smartFormatting && category === 'email') t = formatEmail(t);
   }
-  return normalizeWhitespace(t);
+  return normalizeWhitespace(masked.restore(t));
 }

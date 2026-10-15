@@ -3,6 +3,9 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { applyRules } from '../app/services/formatting/rules.js';
 import { applyCorrections, applyVocabulary, expandSnippets } from '../app/services/formatting/dictionary.js';
+import { formatAddressField } from '../app/services/formatting/addresses.js';
+import { finalizeText } from '../app/services/formatting/index.js';
+import { classifyField } from '../app/services/app_category_service.js';
 import { cleanAsrText } from '../app/services/asr/index.js';
 
 const fmt = (text, opts = {}) => applyRules(text, { cleanupLevel: 'light', style: 'formal', ...opts });
@@ -136,4 +139,50 @@ test('ASR hallucination filter only applies to near-silent audio', () => {
   assert.equal(cleanAsrText('Thank you.', { weakSpeech: true }), '');
   assert.equal(cleanAsrText('Thank you.', { weakSpeech: false }), 'Thank you.');
   assert.equal(cleanAsrText('[BLANK_AUDIO]'), '');
+});
+
+// --- Email and web addresses ------------------------------------------------
+test('addresses are never split, capitalised or given a period', () => {
+  const email = { category: 'email' };
+  assert.equal(finalizeText(fmt('khappil.loginhti@gmail.com', email)), 'khappil.loginhti@gmail.com');
+  assert.equal(finalizeText(fmt('www.youtube.com')), 'www.youtube.com');
+  assert.equal(fmt('Write to me at kapil.sharma@gmail.com about the 3.5 release'), 'Write to me at kapil.sharma@gmail.com about the 3.5 release.');
+});
+
+test('spoken addresses are written out', () => {
+  assert.equal(finalizeText(fmt('couple dot login hta@gmail.com')), 'couple.loginhta@gmail.com');
+  assert.equal(finalizeText(fmt('my email is kapil dot sharma at gmail dot com')), 'My email is kapil.sharma@gmail.com');
+  assert.equal(fmt('visit youtube dot com for more'), 'Visit youtube.com for more.');
+  // Ordinary speech is left alone.
+  assert.equal(fmt('the dot com bubble burst'), 'The dot com bubble burst.');
+  assert.equal(fmt("I'm at home today"), "I'm at home today.");
+  assert.equal(fmt('I live in Delhi. In the morning I run.'), 'I live in Delhi. In the morning I run.');
+});
+
+test('recipient fields join every spoken address', () => {
+  assert.equal(formatAddressField('kapil dot login hta at gmail dot com'), 'kapil.loginhta@gmail.com');
+  assert.equal(formatAddressField('john at gmail dot com and sam at acme dot io.'), 'john@gmail.com, sam@acme.io');
+});
+
+test('fragments and one-line fields get no final period', () => {
+  assert.equal(finalizeText('Kapil.'), 'Kapil');
+  assert.equal(finalizeText('YouTube.'), 'YouTube');
+  assert.equal(finalizeText('Quarterly report draft.', { field: 'short' }), 'Quarterly report draft');
+  assert.equal(finalizeText('Are you free?'), 'Are you free?');
+  assert.equal(finalizeText('See you at the meeting tomorrow.'), 'See you at the meeting tomorrow.');
+});
+
+test('stacked correction cues keep the final value', () => {
+  assert.equal(fmt('I can send it by 3pm actually make it 4pm thanks'), 'I can send it by 4 PM thanks.');
+  assert.equal(fmt('I can send it by 3PM, actually make it 4PM, thanks.'), 'I can send it by 4 PM, thanks.');
+});
+
+test('focused field names map to field types', () => {
+  assert.equal(classifyField('To recipients'), 'address');
+  assert.equal(classifyField('Cc'), 'address');
+  assert.equal(classifyField('To do list'), 'text');
+  assert.equal(classifyField('Subject'), 'short');
+  assert.equal(classifyField('Address and search bar'), 'short');
+  assert.equal(classifyField('Message Body'), 'text');
+  assert.equal(classifyField(null), 'text');
 });

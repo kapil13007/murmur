@@ -1,5 +1,4 @@
 // File: app/services/auth_service.js
-import crypto from 'node:crypto';
 import { HttpError, badRequest, conflict, unauthorized } from '../core/errors.js';
 import { isValidTimeZone } from '../core/dates.js';
 import { createAccessToken, hashPassword, verifyPassword } from '../core/security.js';
@@ -11,35 +10,16 @@ import {
   bumpTokenVersion,
   createUser,
   getUserByEmail,
-  getUserByReferralCode,
   recordFailedLogin,
   recordSuccessfulLogin,
 } from '../crud/user_crud.js';
-import { ensureSubscription } from './billing_service.js';
 import { sendWelcome } from './notification_service.js';
-import { linkReferralOnSignup } from './referral_service.js';
-import { acceptPendingInvitationsNotice } from './team_service.js';
-
-// "PREM" + 3 digits, like Wispr Flow's "KAPIL941" referral codes.
-async function generateReferralCode(firstName) {
-  const base = (firstName || 'FLOW').toUpperCase().replace(/[^A-Z]/g, '').slice(0, 8) || 'FLOW';
-  for (let attempt = 0; attempt < 20; attempt++) {
-    const digits = attempt < 10 ? 3 : 5;
-    const code = `${base}${crypto.randomInt(10 ** (digits - 1), 10 ** digits)}`;
-    if (!(await getUserByReferralCode(code))) return code;
-  }
-  return `${base}${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
-}
 
 export async function registerUser(data) {
   if (await getUserByEmail(data.email)) {
     throw conflict('An account with this email already exists');
   }
-  const referrer = data.referral_code ? await getUserByReferralCode(data.referral_code) : null;
-  if (data.referral_code && !referrer) throw badRequest('That referral code is not valid');
-
   const passwordHash = await hashPassword(data.password);
-  const referralCode = await generateReferralCode(data.first_name);
   const timezone = data.timezone && isValidTimeZone(data.timezone) ? data.timezone : 'UTC';
 
   const user = await withTransaction(async (transaction) => {
@@ -49,21 +29,16 @@ export async function registerUser(data) {
         password_hash: passwordHash,
         first_name: data.first_name,
         last_name: data.last_name || null,
-        referral_code: referralCode,
-        referred_by_user_id: referrer ? referrer.id : null,
       },
       { transaction },
     );
     await createPreferences(created.id, { timezone }, { transaction });
-    await ensureSubscription(created.id, { transaction });
     await ensureDefaultStyles(created.id, { transaction });
     await ensureBuiltinTransforms(created.id, { transaction });
     return created;
   });
 
   await sendWelcome(user);
-  if (referrer) await linkReferralOnSignup(referrer, user);
-  await acceptPendingInvitationsNotice(user);
   return user;
 }
 

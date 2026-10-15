@@ -47,15 +47,15 @@ const EnvSchema = z.object({
   LLM_PROVIDER: z.enum(['none', 'anthropic', 'openai', 'groq']).default('none'),
   ANTHROPIC_MODEL: z.string().default('claude-opus-5-5'),
   OPENAI_LLM_MODEL: z.string().default('gpt-4.1-mini'),
-  GROQ_LLM_MODEL: z.string().default('llama-3.3-70b-versatile'),
+  // Fastest accurate option on Groq for dictation cleanup (reasoning is
+  // switched off per request, see openai_compatible_provider.js).
+  GROQ_LLM_MODEL: z.string().default('qwen/qwen3.8-27b'),
   LLM_TIMEOUT_MS: int(12000),
 
   GROQ_API_KEY: z.string().optional().default(''),
   OPENAI_API_KEY: z.string().optional().default(''),
   ANTHROPIC_API_KEY: z.string().optional().default(''),
 
-  BASIC_WEEKLY_WORD_LIMIT: int(2000),
-  PRO_TRIAL_DAYS: int(14),
   AUDIO_RETENTION_DAYS: int(14),
 });
 

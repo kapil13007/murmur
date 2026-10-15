@@ -1,5 +1,5 @@
 // File: desktop/renderer/flowbar/flowbar.js
-// Flow Bar renderer: draws the pill (idle / listening / processing / result),
+// Murmur bar renderer: draws the pill (idle / listening / processing / result),
 // records the microphone when the main process asks, and plays the chimes.
 /* global flowBar */
 (() => {
@@ -20,7 +20,7 @@
   // ---------------------------------------------------------------------------
   // Recorder: microphone -> 16 kHz AudioWorklet -> 16-bit PCM WAV.
   // The AudioContext is created once and suspended between dictations; the
-  // microphone itself is only open while Flow is listening.
+  // microphone itself is only open while Murmur is listening.
   // ---------------------------------------------------------------------------
   const recorder = (() => {
     let ctx = null;
@@ -82,7 +82,7 @@
     }
 
     async function stop() {
-      if (!node) throw new Error('Flow was not recording');
+      if (!node) throw new Error('Murmur was not recording');
       // Let the worklet hand over its last batch of samples.
       await new Promise((resolve) => setTimeout(resolve, 120));
       const recorded = chunks;

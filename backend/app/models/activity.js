@@ -1,7 +1,7 @@
 // File: app/models/activity.js
-// Usage rollups maintained on every dictation. They back streaks, the
-// Insights heatmap, "Top apps" and the weekly word allowance, and are
-// independent of transcript retention settings.
+// Usage rollups maintained on every dictation. They back the Home stat pills
+// (words, streaks, apps, time saved) and are independent of transcript
+// retention settings.
 import { DataTypes, Model } from 'sequelize';
 
 export class DailyActivity extends Model {}

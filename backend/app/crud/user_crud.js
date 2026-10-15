@@ -12,10 +12,6 @@ export function getUserByEmail(email, options = {}) {
   return User.findOne({ where: { email: String(email).trim().toLowerCase() }, ...options });
 }
 
-export function getUserByReferralCode(code, options = {}) {
-  return User.findOne({ where: { referral_code: String(code).trim().toUpperCase() }, ...options });
-}
-
 export function createUser(data, options = {}) {
   return User.create(data, options);
 }

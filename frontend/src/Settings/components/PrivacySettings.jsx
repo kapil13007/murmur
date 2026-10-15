@@ -79,7 +79,7 @@ export default function PrivacySettings() {
       </SettingSection>
 
       <SettingSection title="Your data">
-        <SettingRow label="Download your data" description="Everything Flow stores about you, as a JSON file.">
+        <SettingRow label="Download your data" description="Everything Murmur stores about you, as a JSON file.">
           <button className="btn-secondary px-3 py-1.5" onClick={download} disabled={exporting}>
             <Download size={14} /> {exporting ? 'Preparing…' : 'Download'}
           </button>

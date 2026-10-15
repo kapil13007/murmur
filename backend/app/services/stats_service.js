@@ -1,15 +1,8 @@
 // File: app/services/stats_service.js
-// Home-page stat pills and the Insights page: totals, words per minute,
-// streaks, heatmap and top apps, computed from the usage rollups.
-import { addDays, daysBetween, localDate, weekStart } from '../core/dates.js';
-import {
-  countApps,
-  getActiveDates,
-  getDailyActivity,
-  getTotals,
-  listAppUsage,
-  sumWordsSince,
-} from '../crud/activity_crud.js';
+// Home-page stat pills: totals, words per minute, streaks and time saved,
+// computed from the usage rollups.
+import { daysBetween, localDate, weekStart } from '../core/dates.js';
+import { countApps, getActiveDates, getTotals, sumWordsSince } from '../crud/activity_crud.js';
 
 const TYPING_WPM = 40; // average typing speed used for "time saved"
 
@@ -68,30 +61,4 @@ export async function getSummary(userId, timezone) {
     time_saved_minutes: Math.round(timeSaved),
     ...computeStreaks(activeDates, today),
   };
-}
-
-export async function getHeatmap(userId, timezone, days = 371) {
-  const end = localDate(timezone);
-  const start = addDays(end, -(days - 1));
-  const rows = await getDailyActivity(userId, start, end);
-  const byDate = new Map(rows.map((r) => [r.activity_date, r.words]));
-  const series = [];
-  for (let i = 0; i < days; i++) {
-    const date = addDays(start, i);
-    series.push({ date, words: byDate.get(date) || 0 });
-  }
-  return { start, end, max: Math.max(0, ...series.map((d) => d.words)), days: series };
-}
-
-export async function getTopApps(userId, limit = 8) {
-  const rows = await listAppUsage(userId, limit);
-  const total = rows.reduce((sum, r) => sum + r.words, 0) || 1;
-  return rows.map((r) => ({
-    app_name: r.app_name,
-    app_category: r.app_category,
-    words: r.words,
-    dictations: r.dictations,
-    share: Math.round((r.words / total) * 1000) / 10,
-    last_used_at: r.last_used_at,
-  }));
 }

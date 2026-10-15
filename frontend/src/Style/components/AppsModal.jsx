@@ -31,7 +31,7 @@ export default function AppsModal({ category, apps, onClose, onSave }) {
   };
 
   return (
-    <Modal isOpen onClose={onClose} title={`Apps for ${category}`} subtitle="Flow uses this style when you dictate into any of these apps.">
+    <Modal isOpen onClose={onClose} title={`Apps for ${category}`} subtitle="Murmur uses this style when you dictate into any of these apps.">
       <div className="flex flex-wrap gap-2">
         {list.map((app) => (
           <span key={app} className="inline-flex items-center gap-1 rounded-full bg-subtle py-1 pl-3 pr-1.5 text-sm text-ink">

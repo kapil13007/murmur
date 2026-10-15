@@ -1,5 +1,5 @@
 // File: desktop/main/windows.js
-// The two windows: the hub (the React app) and the Flow Bar (the small pill
+// The two windows: the hub (the React app) and the Murmur bar (the small pill
 // at the bottom of the screen that shows recording state).
 const path = require('node:path');
 const { BrowserWindow, screen, shell } = require('electron');
@@ -32,7 +32,7 @@ function createHub({ show = true } = {}) {
     minWidth: 980,
     minHeight: 640,
     show: false,
-    title: 'Whisper Flow',
+    title: 'Murmur',
     backgroundColor: '#faf9f7',
     icon: path.join(ROOT, 'assets', 'icon.png'),
     autoHideMenuBar: true,
@@ -64,7 +64,7 @@ function createHub({ show = true } = {}) {
       if (/^https?:/.test(url)) shell.openExternal(url);
     }
   });
-  // Closing the hub keeps Flow running in the tray, like Wispr Flow.
+  // Closing the hub keeps Murmur running in the tray, like Wispr Flow.
   hub.on('close', (event) => {
     if (!quitting) {
       event.preventDefault();
@@ -86,7 +86,7 @@ function getHub() {
   return hub && !hub.isDestroyed() ? hub : null;
 }
 
-// --- Flow Bar ----------------------------------------------------------------
+// --- Murmur bar ----------------------------------------------------------------
 const BAR_WIDTH = 440;
 const BAR_HEIGHT = 150;
 let barPosition = 'bottom';

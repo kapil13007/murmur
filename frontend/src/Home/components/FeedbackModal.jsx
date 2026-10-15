@@ -9,7 +9,7 @@ export default function FeedbackModal({ transcript, onClose, onSubmit }) {
     onClose();
   };
   return (
-    <Modal isOpen onClose={onClose} title="Report to improve" subtitle="Tell us what Flow should have written instead.">
+    <Modal isOpen onClose={onClose} title="Report to improve" subtitle="Tell us what Murmur should have written instead.">
       <textarea
         className="input min-h-[110px] resize-y"
         placeholder="Describe what you expected instead"

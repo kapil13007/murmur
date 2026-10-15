@@ -1,8 +1,8 @@
 // File: app/services/dictation_service.js
 // The dictation pipeline behind the push-to-talk hotkey:
-//   audio -> silence check -> weekly allowance -> speech-to-text -> AI cleanup
-//   -> dictionary/snippets -> save (respecting privacy settings) -> usage
-//   rollups -> live update to open hub windows.
+//   audio -> silence check -> speech-to-text -> AI cleanup -> dictionary/
+//   snippets -> save (respecting privacy settings) -> usage rollups -> live
+//   update to open hub windows.
 import { HttpError, badRequest } from '../core/errors.js';
 import { localDate } from '../core/dates.js';
 import { getLogger } from '../core/logger.js';
@@ -11,20 +11,17 @@ import { getFormattingEntries, recordUsage } from '../crud/dictionary_crud.js';
 import { getDeviceByUid } from '../crud/device_crud.js';
 import { getPreferences } from '../crud/preference_crud.js';
 import { listStyles } from '../crud/style_crud.js';
-import { getTeamIdForUser } from '../crud/team_crud.js';
 import { getTotals, incrementAppUsage, incrementDailyActivity } from '../crud/activity_crud.js';
 import { Transcript } from '../models/index.js';
 import { toTranscriptOut } from '../schemas/history_schema.js';
 import { AudioFormatError, hasSpeech, prepareAudio } from './audio/wav.js';
 import { languageHint, transcribe } from './asr/index.js';
-import { categorizeApp } from './app_category_service.js';
-import { getSubscriptionSummary } from './billing_service.js';
+import { categorizeApp, classifyField } from './app_category_service.js';
 import { formatTranscript } from './formatting/index.js';
 import { countWords } from './formatting/text_utils.js';
-import { checkMilestones, notify } from './notification_service.js';
+import { checkMilestones } from './notification_service.js';
 import { publish } from './realtime_service.js';
 import { getSummary } from './stats_service.js';
-import { assertCanDictate, getWeeklyUsage } from './usage_service.js';
 
 const logger = getLogger('dictation');
 
@@ -38,14 +35,16 @@ export function decodeUpload(file) {
   }
 }
 
-export async function buildFormattingContext(user, prefs, { appName, url, windowTitle, language }) {
-  const [styles, teamId] = await Promise.all([listStyles(user.id), getTeamIdForUser(user.id)]);
-  const entries = await getFormattingEntries(user.id, teamId);
+export async function buildFormattingContext(user, prefs, { appName, url, windowTitle, fieldName, language }) {
+  const [styles, entries] = await Promise.all([listStyles(user.id), getFormattingEntries(user.id)]);
   // With "Context awareness" off, the app the user is in is ignored entirely.
-  const context = prefs.context_awareness ? { appName, url, windowTitle } : {};
+  const context = prefs.context_awareness ? { appName, url, windowTitle, fieldName } : {};
   const category = categorizeApp(context, styles);
   return {
     category,
+    // What kind of text box the cursor is in: an address field (To / Cc),
+    // a short one-line field (subject, search, URL bar) or ordinary text.
+    field: classifyField(context.fieldName),
     style: styles.find((s) => s.category === category)?.style || 'formal',
     cleanupLevel: prefs.auto_cleanup_level,
     aiFormatting: prefs.ai_formatting,
@@ -53,13 +52,18 @@ export async function buildFormattingContext(user, prefs, { appName, url, window
     appName: context.appName || null,
     language,
     firstName: user.first_name,
+    lastName: user.last_name,
     emailAutoSignature: prefs.email_auto_signature,
     emailSignature: prefs.email_signature,
     ...entries,
   };
 }
 
+// Words Whisper should expect: the user's own name first (it's the word
+// most often misheard), then their dictionary.
 const vocabularyHints = (ctx) => [
+  ctx.firstName,
+  ctx.lastName,
   ...ctx.vocabulary.map((v) => v.phrase),
   ...ctx.corrections.map((c) => c.replacement),
 ];
@@ -80,7 +84,7 @@ async function persist(prefs, data, audio) {
   return transcript;
 }
 
-async function afterDictation(user, prefs, subscription, { words, duration, appName, category }) {
+async function afterDictation(user, prefs, { words, duration, appName, category }) {
   const today = localDate(prefs.timezone);
   await incrementDailyActivity(user.id, today, { words, duration });
   if (appName) await incrementAppUsage(user.id, appName.slice(0, 255), category, words);
@@ -94,38 +98,12 @@ async function afterDictation(user, prefs, subscription, { words, duration, appN
       wordsAfter: totals.words,
       dayStreak: summary.day_streak,
     });
-    if (!subscription.is_pro) {
-      const usage = await getWeeklyUsage(user.id, prefs.timezone, subscription);
-      const pct = usage.words_used / usage.limit;
-      if (pct >= 1) {
-        await notify(user.id, {
-          type: 'usage',
-          key: `usage:reached:${usage.week_start}`,
-          title: "You've reached this week's word limit",
-          body: 'Upgrade to Flow Pro for unlimited dictation, or wait for the weekly reset.',
-          action_label: 'Upgrade',
-          action_url: '/settings/plans',
-        });
-      } else if (pct >= 0.8) {
-        await notify(user.id, {
-          type: 'usage',
-          key: `usage:alert:${usage.week_start}`,
-          title: `Only ${usage.remaining.toLocaleString('en-US')} words left this week`,
-          body: 'Your Basic allowance resets on Sunday. Upgrade for unlimited words.',
-          action_label: 'See plans',
-          action_url: '/settings/plans',
-        });
-      }
-    }
   })().catch((err) => logger.warn(`Post-dictation notifications failed: ${err.message}`));
 }
 
 export async function processDictation(user, file, meta) {
   const started = Date.now();
   const prefs = await getPreferences(user.id);
-  const subscription = await getSubscriptionSummary(user.id);
-  await assertCanDictate(user.id, prefs.timezone, subscription);
-
   const audio = decodeUpload(file);
   const device = await getDeviceByUid(user.id, meta.device_uid);
   const language = languageHint(prefs.selected_languages, meta.language);
@@ -133,6 +111,7 @@ export async function processDictation(user, file, meta) {
     appName: meta.app_name,
     url: meta.url,
     windowTitle: meta.window_title,
+    fieldName: meta.field_name,
     language,
   });
 
@@ -153,6 +132,7 @@ export async function processDictation(user, file, meta) {
     platform: meta.platform,
     personalization: {
       category: ctx.category,
+      field: ctx.field,
       style: ctx.style,
       cleanup_level: ctx.cleanupLevel,
       ai_formatting: ctx.aiFormatting,
@@ -174,7 +154,7 @@ export async function processDictation(user, file, meta) {
   });
   if (!asr.text) {
     const transcript = await persist(prefs, { ...base, status: 'empty', asr_provider: asr.provider, asr_model: asr.model, asr_latency_ms: asr.latencyMs }, audio);
-    return { status: 'empty', text: '', message: "Flow couldn't make out any words. Try again a little closer to the mic.", transcript: toTranscriptOut(transcript) };
+    return { status: 'empty', text: '', message: "Murmur couldn't make out any words. Try again a little closer to the mic.", transcript: toTranscriptOut(transcript) };
   }
 
   const formatted = await formatTranscript(asr.text, ctx);
@@ -202,7 +182,7 @@ export async function processDictation(user, file, meta) {
   );
 
   await recordUsage([...formatted.usedEntryIds]);
-  await afterDictation(user, prefs, subscription, {
+  await afterDictation(user, prefs, {
     words,
     duration: audio.analysis.speechSpanSeconds || audio.analysis.durationSeconds,
     appName: base.app_name,
@@ -236,6 +216,8 @@ export async function retryTranscript(user, transcript) {
     windowTitle: transcript.window_title,
     language: transcript.language,
   });
+  // The field type isn't re-detectable later, so reuse what was recorded.
+  if (transcript.personalization?.field) ctx.field = transcript.personalization.field;
   const asr = await transcribe({
     samples: audio.samples,
     wav: audio.wav,
@@ -268,8 +250,7 @@ export async function retryTranscript(user, transcript) {
     error_message: null,
   });
   if (!wasCounted) {
-    const subscription = await getSubscriptionSummary(user.id);
-    await afterDictation(user, prefs, subscription, {
+    await afterDictation(user, prefs, {
       words,
       duration: audio.analysis.speechSpanSeconds,
       appName: transcript.app_name,
@@ -283,12 +264,13 @@ export async function retryTranscript(user, transcript) {
 
 // Runs typed text through the same cleanup pipeline (hub "try it" box and
 // Style previews) without touching history or usage.
-export async function formatText(user, { text, app_name, url, window_title, style, cleanup_level }) {
+export async function formatText(user, { text, app_name, url, window_title, field_name, style, cleanup_level }) {
   const prefs = await getPreferences(user.id);
   const ctx = await buildFormattingContext(user, prefs, {
     appName: app_name,
     url,
     windowTitle: window_title,
+    fieldName: field_name,
     language: languageHint(prefs.selected_languages),
   });
   if (style) ctx.style = style;

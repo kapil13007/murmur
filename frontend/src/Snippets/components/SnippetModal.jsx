@@ -2,14 +2,12 @@
 import { useState } from 'react';
 import { errorMessage } from '../../api/apiClient';
 import Modal from '../../components/ui/Modal';
-import ShareToggle from '../../components/entries/ShareToggle';
 
 const MAX_EXPANSION = 4000;
 
-export default function SnippetModal({ isOpen, mode, entry, hasTeam, onClose, onSave }) {
+export default function SnippetModal({ isOpen, mode, entry, onClose, onSave }) {
   const [phrase, setPhrase] = useState(entry?.phrase || '');
   const [replacement, setReplacement] = useState(entry?.replacement || '');
-  const [share, setShare] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
@@ -21,7 +19,6 @@ export default function SnippetModal({ isOpen, mode, entry, hasTeam, onClose, on
     setError('');
     try {
       const payload = { phrase: phrase.trim(), replacement };
-      if (mode === 'add') payload.share_with_team = share;
       await onSave(payload);
     } catch (err) {
       setError(errorMessage(err));
@@ -47,12 +44,11 @@ export default function SnippetModal({ isOpen, mode, entry, hasTeam, onClose, on
           <textarea
             id="snippet-expansion"
             className="input min-h-[140px] resize-y"
-            placeholder="What Flow will type, e.g. https://cal.com/you/30min"
+            placeholder="What Murmur will type, e.g. https://cal.com/you/30min"
             value={replacement}
             onChange={(e) => setReplacement(e.target.value)}
           />
         </div>
-        {mode === 'add' && <ShareToggle noun="snippet" hasTeam={hasTeam} checked={share} onChange={setShare} />}
         {error && <p className="text-sm text-flare-500">{error}</p>}
         <div className="flex justify-end gap-2 pt-1">
           <button type="button" className="btn-secondary" onClick={onClose}>

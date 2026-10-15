@@ -15,7 +15,7 @@ const STYLES = {
   formal: 'Formal: standard capitalization and full punctuation, including a final period.',
   casual: 'Casual: standard capitalization with lighter punctuation; omit the period at the very end.',
   very_casual:
-    'Very casual: lowercase sentence starts (keep proper nouns and "I" capitalized), minimal punctuation, no period at the end, like a quick text message.',
+    'Very casual: lowercase sentence starts (keep proper nouns and "I" capitalized), minimal punctuation, times like "4pm", no period at the end, like a quick text message.',
   excited: 'Excited: upbeat and energetic; end sentences with exclamation marks where natural.',
 };
 
@@ -26,7 +26,7 @@ const CATEGORY_CONTEXT = {
   other: 'a text field',
 };
 
-export function buildFormattingPrompt({ cleanupLevel, style, category, appName, smartFormatting, vocabulary, languageHint, firstName }) {
+export function buildFormattingPrompt({ cleanupLevel, style, category, field = 'text', appName, smartFormatting, vocabulary, languageHint, firstName }) {
   const where = appName ? `${appName} (${CATEGORY_CONTEXT[category] || 'a text field'})` : CATEGORY_CONTEXT[category] || 'a text field';
   const lines = [
     `You turn raw speech-to-text output into the text the speaker meant to type into ${where}.`,
@@ -37,19 +37,26 @@ export function buildFormattingPrompt({ cleanupLevel, style, category, appName, 
     `Cleanup: ${CLEANUP_LEVELS[cleanupLevel] || CLEANUP_LEVELS.light}`,
     'Self-corrections: when the speaker corrects themselves ("at 3, actually 4", "scratch that", "no wait"), keep only the final intended version.',
     `Style: ${STYLES[style] || STYLES.formal}`,
+    'Addresses: write email and web addresses exactly as typed: lowercase, no spaces, spoken "dot", "at", "underscore" and "dash" turned into symbols ("kapil dot sharma at gmail dot com" becomes "kapil.sharma@gmail.com"). Never put a period directly after an address.',
+    'Fragments: if the dictation is only a name, a single word or a short phrase, return it without adding a period.',
   ];
+  if (field === 'short') {
+    lines.push('Field: the text goes into a one-line field such as an email subject or a search box. Keep it on one line and do not end it with a period.');
+  }
   if (smartFormatting) {
     lines.push(
-      'Formatting: when the speaker lists items, format them as a list (numbered when the order matters, "-" bullets otherwise). Turn spoken commands such as "new line", "new paragraph" and "question mark" into the formatting itself. Write numbers, times, dates, emails and URLs in their usual written form.',
+      'Formatting: when the speaker lists items, format them as a list (numbered when the order matters, "-" bullets otherwise). Turn spoken commands such as "new line", "new paragraph" and "question mark" into the formatting itself. Write numbers and dates in their usual written form, and times as "4 PM" or "4:30 PM" unless the style says otherwise.',
     );
-    if (category === 'email') {
+    if (category === 'email' && field === 'text') {
       lines.push(
         `This is an email: put the greeting on its own line, separate paragraphs with blank lines, and put a spoken sign-off on its own line followed by the name${firstName ? ` (the sender is ${firstName})` : ''}.`,
       );
     }
   }
   if (vocabulary.length) {
-    lines.push(`Vocabulary: when the speaker says any of these words or something that sounds like them, spell them exactly like this: ${vocabulary.slice(0, 150).join(', ')}.`);
+    lines.push(
+      `Vocabulary: when the speaker says any of these names or terms, or something that clearly sounds like one of them in context, spell it exactly like this: ${vocabulary.slice(0, 150).join(', ')}. Leave ordinary words alone ("a couple of days" stays as it is).`,
+    );
   }
   lines.push(
     languageHint && languageHint !== 'en'

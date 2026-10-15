@@ -36,7 +36,6 @@ export function toUserOut(user) {
     last_name: user.last_name,
     full_name: user.fullName,
     avatar_url: user.avatar_url,
-    referral_code: user.referral_code,
     product_intent: user.product_intent,
     onboarding_completed: user.onboarding_completed,
     onboarding_completed_at: user.onboarding_completed_at,
