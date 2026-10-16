@@ -6,6 +6,7 @@ import { createTranscript } from '../crud/transcript_crud.js';
 import { createCommandRun } from '../crud/transform_crud.js';
 import { getPreferences } from '../crud/preference_crud.js';
 import { languageHint, transcribe } from './asr/index.js';
+import { supportedLanguages } from '../models/constants.js';
 import { hasSpeech } from './audio/wav.js';
 import { decodeUpload } from './dictation_service.js';
 import { applyRules } from './formatting/rules.js';
@@ -30,7 +31,7 @@ export async function runCommand(user, file, meta) {
       samples: audio.samples,
       wav: audio.wav,
       language,
-      allowedLanguages: prefs.selected_languages,
+      allowedLanguages: supportedLanguages(prefs.selected_languages),
       speechSeconds: audio.analysis.speechSeconds,
     });
     instruction = applyRules(asr.text, { cleanupLevel: 'light', style: 'formal', smartFormatting: false });

@@ -13,7 +13,6 @@ import MicStep from './components/MicStep';
 import PrivacyStep from './components/PrivacyStep';
 import ShortcutStep from './components/ShortcutStep';
 import TryItStep from './components/TryItStep';
-import { LANGUAGES } from '../utils/languages';
 
 const ROLES = ['Student', 'Engineer', 'Founder', 'Product', 'Designer', 'Sales', 'Marketing', 'Support', 'Writer', 'Other'];
 const LOCATIONS = [
@@ -121,10 +120,10 @@ export default function Onboarding() {
           )}
 
           {current === 'language' && (
-            <Step title="Which languages do you speak?" subtitle="Pick the languages you'll dictate in. Choosing one gives the best accuracy.">
-              <ChipGroup options={LANGUAGES.slice(0, 18).map((l) => [l.code, l.name])} value={languages} onChange={setLanguages} />
-              <p className="mt-3 text-xs text-muted">More languages (or auto-detect) are available in Settings &gt; General.</p>
-              <Footer back={back}>{continueButton('Continue', !languages.length)}</Footer>
+            <Step title="Dictate in English" subtitle="Murmur currently understands English, and uses that to be as accurate as it can.">
+              <ChipGroup options={[['en', 'English']]} value={languages} onChange={() => setLanguages(['en'])} />
+              <p className="mt-3 text-xs text-muted">More languages are coming soon.</p>
+              <Footer back={back}>{continueButton('Continue')}</Footer>
             </Step>
           )}
 

@@ -1,5 +1,6 @@
 // File: app/schemas/user_schema.js
 import { z } from 'zod';
+import { supportedLanguages } from '../models/constants.js';
 
 export const UpdateProfileRequest = z
   .object({
@@ -20,7 +21,7 @@ export const OnboardingRequest = z.object({
   role: z.string().trim().max(60).optional(),
   writing_needs: z.array(z.string().max(60)).max(20).default([]),
   typing_locations: z.array(z.string().max(50)).max(20).default([]),
-  selected_languages: z.array(z.string().min(2).max(10)).max(10).optional(),
+  selected_languages: z.array(z.string().min(2).max(10)).max(10).transform(supportedLanguages).optional(),
   timezone: z.string().max(64).optional(),
 });
 

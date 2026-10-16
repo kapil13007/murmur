@@ -1,7 +1,7 @@
 {
   "name": "prem-murmur-desktop",
   "productName": "Murmur",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "Murmur desktop app: global push-to-talk dictation into any app",
   "author": "Prem",

@@ -3,6 +3,7 @@ import { z } from 'zod';
 import {
   CLEANUP_LEVELS,
   DATA_RETENTION,
+  supportedLanguages,
   POLISH_INSTRUCTION_LABELS,
   SHORTCUT_ACTIONS,
   THEMES,
@@ -50,7 +51,8 @@ export const UpdatePreferencesRequest = z
     ai_formatting: z.boolean(),
     auto_cleanup_level: z.enum(CLEANUP_LEVELS),
     smart_formatting: z.boolean(),
-    selected_languages: z.array(z.string().min(2).max(10)).max(10),
+    // Unsupported languages are dropped (older apps may still send them).
+    selected_languages: z.array(z.string().min(2).max(10)).max(10).transform(supportedLanguages),
     ui_locale: z.string().min(2).max(10),
     timezone: z.string().min(1).max(64),
     microphone_device_id: z.string().max(500).nullable(),

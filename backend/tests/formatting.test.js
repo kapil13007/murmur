@@ -6,7 +6,8 @@ import { applyCorrections, applyVocabulary, expandSnippets } from '../app/servic
 import { formatAddressField } from '../app/services/formatting/addresses.js';
 import { finalizeText } from '../app/services/formatting/index.js';
 import { classifyField } from '../app/services/app_category_service.js';
-import { cleanAsrText } from '../app/services/asr/index.js';
+import { cleanAsrText, languageHint } from '../app/services/asr/index.js';
+import { supportedLanguages } from '../app/models/constants.js';
 import { needsLanguageRetry, toIsoLanguage } from '../app/services/asr/languages.js';
 
 const fmt = (text, opts = {}) => applyRules(text, { cleanupLevel: 'light', style: 'formal', ...opts });
@@ -202,4 +203,13 @@ test('a guess outside the languages the user speaks triggers a re-run', () => {
   assert.equal(needsLanguageRetry({ allowedLanguages: allowed, detectedLanguage: null }), false);
   assert.equal(toIsoLanguage('Icelandic'), 'is');
   assert.equal(toIsoLanguage('en'), 'en');
+});
+
+test('only English is enabled for now', () => {
+  assert.deepEqual(supportedLanguages(['ta', 'en', 'fr']), ['en']);
+  assert.deepEqual(supportedLanguages(['ta']), ['en']);
+  assert.deepEqual(supportedLanguages([]), ['en']);
+  assert.equal(languageHint(['en', 'ta']), 'en'); // forced, never auto-detected
+  assert.equal(languageHint([]), 'en');
+  assert.equal(languageHint(['ta'], 'hi'), 'en'); // a client can't override it either
 });

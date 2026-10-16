@@ -16,6 +16,7 @@ import { Transcript } from '../models/index.js';
 import { toTranscriptOut } from '../schemas/history_schema.js';
 import { AudioFormatError, hasSpeech, prepareAudio } from './audio/wav.js';
 import { languageHint, transcribe } from './asr/index.js';
+import { supportedLanguages } from '../models/constants.js';
 import { categorizeApp, classifyField } from './app_category_service.js';
 import { formatTranscript } from './formatting/index.js';
 import { countWords } from './formatting/text_utils.js';
@@ -149,7 +150,7 @@ export async function processDictation(user, file, meta) {
     samples: audio.samples,
     wav: audio.wav,
     language,
-    allowedLanguages: prefs.selected_languages,
+    allowedLanguages: supportedLanguages(prefs.selected_languages),
     vocabulary: vocabularyHints(ctx),
     speechSeconds: audio.analysis.speechSeconds,
   });
@@ -223,7 +224,7 @@ export async function retryTranscript(user, transcript) {
     samples: audio.samples,
     wav: audio.wav,
     language: transcript.language,
-    allowedLanguages: prefs.selected_languages,
+    allowedLanguages: supportedLanguages(prefs.selected_languages),
     vocabulary: vocabularyHints(ctx),
     speechSeconds: audio.analysis.speechSeconds,
   });

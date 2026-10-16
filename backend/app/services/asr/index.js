@@ -4,6 +4,7 @@
 // is known to hallucinate on near-silent audio.
 import { settings } from '../../core/config.js';
 import { HttpError, preconditionRequired } from '../../core/errors.js';
+import { SUPPORTED_LANGUAGES, supportedLanguages } from '../../models/constants.js';
 import { getLogger } from '../../core/logger.js';
 import { isLocalWhisperReady, transcribeLocal, warmUpLocalWhisper } from './local_whisper.js';
 import { needsLanguageRetry } from './languages.js';
@@ -47,9 +48,9 @@ export function cleanAsrText(text, { weakSpeech = false } = {}) {
 // Picks a single Whisper language hint from the user's languages; with more
 // than one language selected, Whisper auto-detects per dictation.
 export function languageHint(selectedLanguages, override) {
-  if (override) return override;
-  if (Array.isArray(selectedLanguages) && selectedLanguages.length === 1) return selectedLanguages[0];
-  return null;
+  if (override && SUPPORTED_LANGUAGES.includes(override)) return override;
+  const languages = supportedLanguages(selectedLanguages);
+  return languages.length === 1 ? languages[0] : null;
 }
 
 // Vocabulary prompt for cloud Whisper, e.g. "Wispr Flow, Kubernetes, Prem."

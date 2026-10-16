@@ -229,6 +229,9 @@ describe('personal edition', () => {
     }
     const word = await api().post(`${V1}/dictionary`).set(user.auth).send({ phrase: 'Murmur' }).expect(201);
     assert.equal(word.body.is_shared, undefined);
+    // Other languages are dropped, even from an older app that still sends them.
+    const prefs = await api().patch(`${V1}/preferences`).set(user.auth).send({ selected_languages: ['ta', 'en'] }).expect(200);
+    assert.deepEqual(prefs.body.selected_languages, ['en']);
     await api().post(`${V1}/dictionary/share`).set(user.auth).send({ ids: [word.body.id] }).expect(404);
   });
 });

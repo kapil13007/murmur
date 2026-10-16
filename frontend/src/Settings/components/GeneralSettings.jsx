@@ -1,9 +1,7 @@
 // File: src/Settings/components/GeneralSettings.jsx
 import { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { describeLanguages } from '../../utils/languages';
 import KeyCombo from '../../components/ui/KeyCombo';
-import LanguagesDialog from './LanguagesDialog';
 import GroqKeyDialog from './GroqKeyDialog';
 import MicrophoneDialog from './MicrophoneDialog';
 import SettingRow, { SettingSection } from './SettingRow';
@@ -34,9 +32,9 @@ export default function GeneralSettings() {
             Change
           </button>
         </SettingRow>
-        <SettingRow label="Languages" description={describeLanguages(prefs.selected_languages)}>
-          <button className="btn-secondary px-3 py-1.5" onClick={() => setDialog('languages')}>
-            Change
+        <SettingRow label="Language" description="English. More languages are coming soon.">
+          <button className="btn-secondary px-3 py-1.5" disabled title="More languages are coming soon">
+            English
           </button>
         </SettingRow>
       </SettingSection>
@@ -77,7 +75,6 @@ export default function GeneralSettings() {
       {dialog === 'shortcuts' && <ShortcutsDialog onClose={() => setDialog(null)} />}
       {dialog === 'microphone' && <MicrophoneDialog onClose={() => setDialog(null)} />}
       {dialog === 'groq' && <GroqKeyDialog onClose={() => setDialog(null)} />}
-      {dialog === 'languages' && <LanguagesDialog onClose={() => setDialog(null)} />}
     </div>
   );
 }

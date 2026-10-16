@@ -14,6 +14,17 @@ export const DICTATION_MODES = ['push_to_talk', 'hands_free', 'command', 'web', 
 export const DICTIONARY_SOURCES = ['manual', 'auto_learned', 'import', 'default'];
 export const NOTIFICATION_TYPES = ['milestone', 'tip', 'feature', 'system', 'learning'];
 
+// Languages Murmur transcribes. Whisper supports ~99, but guessing among
+// several makes short clips unreliable, so only English is enabled for now.
+// Add codes here (and in frontend/src/utils/languages.js) to enable more.
+export const SUPPORTED_LANGUAGES = ['en'];
+
+// Drops unsupported codes from a list; an empty result means "the default".
+export function supportedLanguages(list) {
+  const ok = (Array.isArray(list) ? list : []).filter((code) => SUPPORTED_LANGUAGES.includes(code));
+  return ok.length ? ok : [...SUPPORTED_LANGUAGES];
+}
+
 export const SHORTCUT_ACTIONS = ['push_to_talk', 'hands_free', 'command_mode', 'paste_last', 'copy_last', 'cancel'];
 
 export const DEFAULT_SHORTCUTS = Object.freeze({
