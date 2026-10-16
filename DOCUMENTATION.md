@@ -804,14 +804,13 @@ The desktop installer is built separately on Windows: `cd desktop && npm run dis
 
 ### Releasing an update
 
-Installed copies of Murmur update themselves ( reads this repo's GitHub releases): they check 20 seconds after start-up and every 6 hours, download a newer installer in the background, and install it when the user chooses **Restart to update** in the tray menu or the next time Murmur quits.
+Installed copies of Murmur update themselves (`electron-updater` reads this repo's GitHub releases): they check 20 seconds after start-up and every 6 hours, download a newer installer in the background, and install it when the user chooses **Restart to update** in the tray menu or the next time Murmur quits.
 
 To ship an app change:
-1. Raise  in  (it must be higher than the last release).
-2. > prem-murmur-desktop@1.0.2 release
-> node scripts/release.js What changed builds the installer and publishes the GitHub release with the three files the updater needs: , its  and .
+1. Raise `version` in `desktop/package.json` (it must be higher than the last release).
+2. Run `npm run release -- "What changed"` in `desktop/`. It builds the installer and publishes the GitHub release with the three files the updater needs: `Murmur-Setup.exe`, its `.blockmap` and `latest.yml`. It refuses to run if that version is already published.
 
-Server and database changes need no release: pushing to  redeploys the API on Render. The first updater-enabled build is 1.0.2; older installs must be reinstalled once by hand.
+Server and database changes need no release: pushing to `main` redeploys the API on Render. The first updater-enabled build is 1.0.2; older installs must be reinstalled once by hand.
 
 ---
 
