@@ -124,6 +124,8 @@ See [DOCUMENTATION.md](DOCUMENTATION.md) for the architecture, database schema, 
 
 **Data isolation:** Every query is scoped to the signed-in user.
 
+**Updates:** Installed copies check GitHub releases and update themselves; see *Releasing an update* in DOCUMENTATION.md.
+
 **Desktop:** The session token is encrypted with Windows DPAPI. The hub runs sandboxed with context isolation and talks to the desktop only through a small, validated IPC bridge. The microphone is opened only while you dictate, and the focused text box is read only for its name and the two characters before the cursor.
 
 **API keys:** Provider keys live only in `backend/.env`, which git ignores.

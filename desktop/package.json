@@ -1,7 +1,7 @@
 {
   "name": "prem-murmur-desktop",
   "productName": "Murmur",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": true,
   "description": "Murmur desktop app: global push-to-talk dictation into any app",
   "author": "Prem",
@@ -13,7 +13,8 @@
     "icons": "node scripts/make-icons.js",
     "postinstall": "node helper/build.js",
     "dist": "npm run build:hub && npm run build:helper && electron-builder --win",
-    "build:hub": "node scripts/build-hub.js"
+    "build:hub": "node scripts/build-hub.js",
+    "release": "node scripts/release.js"
   },
   "build": {
     "appId": "com.prem.murmur",
@@ -50,11 +51,21 @@
       "perMachine": false,
       "allowToChangeInstallationDirectory": true,
       "artifactName": "Murmur-Setup.exe"
-    }
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "kapil13007",
+        "repo": "murmur"
+      }
+    ]
   },
   "devDependencies": {
     "cross-env": "^10.1.0",
     "electron": "^44.7.2",
     "electron-builder": "^26.15.3"
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.9"
   }
 }

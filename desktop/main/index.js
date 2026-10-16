@@ -18,6 +18,7 @@ if (!app.requestSingleInstanceLock()) {
   const dictation = require('./dictation');
   const windows = require('./windows');
   const { createTray, updateTray } = require('./tray');
+  const updater = require('./updater');
 
   let user = null;
   let prefs = null;
@@ -214,6 +215,14 @@ if (!app.requestSingleInstanceLock()) {
       openHub,
       pasteLast: () => dictation.pasteLast(),
       updatePreferences,
+      checkForUpdates: () => updater.checkForUpdates(),
+      installUpdate: async () => {
+        // The installer can't replace MurmurHelper.exe while it is running.
+        await dictation.cancel({ quiet: true });
+        helper.stop();
+        await new Promise((resolve) => setTimeout(resolve, 800));
+        updater.installUpdate();
+      },
       quit: () => app.quit(),
     });
     dictation.showHub = (route) => openHub(route);
@@ -232,5 +241,10 @@ if (!app.requestSingleInstanceLock()) {
 
     helper.start();
     loadAccount();
+
+    updater.initUpdater((update) => {
+      updateTray({ update });
+      if (update.status === 'ready') bar.toast(`Update ${update.version} is ready. Restart from the tray menu.`);
+    });
   });
 }
