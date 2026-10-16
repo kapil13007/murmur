@@ -3,6 +3,7 @@
 // local Whisper if a cloud provider errors, and filters the phrases Whisper
 // is known to hallucinate on near-silent audio.
 import { settings } from '../../core/config.js';
+import { HttpError, preconditionRequired } from '../../core/errors.js';
 import { getLogger } from '../../core/logger.js';
 import { isLocalWhisperReady, transcribeLocal, warmUpLocalWhisper } from './local_whisper.js';
 import { transcribeRemote } from './remote_whisper.js';
@@ -67,6 +68,9 @@ export async function transcribe({ samples, wav, language, vocabulary = [], spee
     try {
       result = await transcribeRemote(provider, wav, { language, prompt: vocabularyPrompt(vocabulary) });
     } catch (err) {
+      if (err instanceof HttpError) throw err; // e.g. no Groq key yet
+      // Public servers have no local Whisper and don't hide a bad key: say so.
+      if (settings.REQUIRE_USER_KEY) throw remoteFailure(provider, err);
       logger.warn(`${provider} ASR failed, falling back to local Whisper: ${err.message}`);
       usedProvider = 'local';
       result = await transcribeLocal(samples, { language });
@@ -100,4 +104,17 @@ export function warmUpAsr() {
   if (settings.ASR_PROVIDER === 'local' && settings.ASR_PRELOAD) {
     warmUpLocalWhisper().catch((err) => logger.error(`Could not load local Whisper: ${err.message}`));
   }
+}
+
+// A cloud failure on a public server, in words the user can act on.
+function remoteFailure(provider, err) {
+  const name = provider === 'groq' ? 'Groq' : provider;
+  if (err.status === 401 || err.status === 403) {
+    return preconditionRequired(`${name} rejected your API key. Check or replace it in Settings.`, { code: 'groq_key_invalid' });
+  }
+  if (err.status === 429) {
+    return new HttpError(429, `Your ${name} key hit its rate limit. Wait a moment and try again.`, { code: 'groq_rate_limited' });
+  }
+  logger.warn(`${provider} ASR failed: ${err.message}`);
+  return new HttpError(502, `${name} couldn't transcribe that. Try again in a moment.`, { code: 'asr_failed' });
 }

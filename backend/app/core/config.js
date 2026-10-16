@@ -32,6 +32,11 @@ const EnvSchema = z.object({
 
   DATABASE_URL: z.string().min(1, 'DATABASE_URL is not set. Add it to backend/.env'),
   DATABASE_ADMIN_URL: z.string().optional(),
+  // Hosted databases (Neon, Supabase, ...) require TLS.
+  DATABASE_SSL: bool(false),
+  // Number of reverse proxies in front of the API (Render = 1), so rate limits
+  // and logs see the visitor's IP instead of the proxy's.
+  TRUST_PROXY: int(0),
 
   SECRET_KEY: z.string().min(16, 'SECRET_KEY must be at least 16 characters (see .env.example)'),
   ACCESS_TOKEN_EXPIRE_MINUTES: int(60),
@@ -51,6 +56,11 @@ const EnvSchema = z.object({
   // switched off per request, see openai_compatible_provider.js).
   GROQ_LLM_MODEL: z.string().default('qwen/qwen3.8-27b'),
   LLM_TIMEOUT_MS: int(12000),
+
+  // Public deployments: every user brings their own Groq key (Settings), the
+  // server never spends its own and never falls back to local Whisper.
+  REQUIRE_USER_KEY: bool(false),
+  KEY_ENCRYPTION_SECRET: z.string().optional().default(''),
 
   GROQ_API_KEY: z.string().optional().default(''),
   OPENAI_API_KEY: z.string().optional().default(''),
@@ -72,12 +82,12 @@ function loadSettings() {
   const keyFor = { groq: env.GROQ_API_KEY, openai: env.OPENAI_API_KEY, anthropic: env.ANTHROPIC_API_KEY };
   const warnings = [];
   let asrProvider = env.ASR_PROVIDER;
-  if (asrProvider !== 'local' && !keyFor[asrProvider]) {
+  if (asrProvider !== 'local' && !keyFor[asrProvider] && !(env.REQUIRE_USER_KEY && asrProvider === 'groq')) {
     warnings.push(`ASR_PROVIDER=${asrProvider} but no API key is set; falling back to local Whisper.`);
     asrProvider = 'local';
   }
   let llmProvider = env.LLM_PROVIDER;
-  if (llmProvider !== 'none' && !keyFor[llmProvider]) {
+  if (llmProvider !== 'none' && !keyFor[llmProvider] && !(env.REQUIRE_USER_KEY && llmProvider === 'groq')) {
     warnings.push(`LLM_PROVIDER=${llmProvider} but no API key is set; falling back to rule-based formatting.`);
     llmProvider = 'none';
   }

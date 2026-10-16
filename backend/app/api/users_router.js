@@ -6,19 +6,27 @@ import { verifyPassword } from '../core/security.js';
 import { validate } from '../core/validators.js';
 import { getPreferences, updatePreferences } from '../crud/preference_crud.js';
 import { deleteUser, updateUser } from '../crud/user_crud.js';
-import { DeleteAccountRequest, OnboardingRequest, UpdateProfileRequest, toUserOut } from '../schemas/user_schema.js';
+import { DeleteAccountRequest, GroqKeyRequest, OnboardingRequest, UpdateProfileRequest, toUserOut } from '../schemas/user_schema.js';
 import { countUnread } from '../crud/notification_crud.js';
+import { groqKeyStatus, removeGroqKey, saveGroqKey } from '../services/groq_key_service.js';
 
 const router = Router();
 
 router.get('/me', async (req, res) => {
-  res.json({ user: toUserOut(req.user), unread_notifications: await countUnread(req.user.id) });
+  res.json({ user: toUserOut(req.user), groq_key: groqKeyStatus(req.user), unread_notifications: await countUnread(req.user.id) });
 });
 
 router.patch('/me', validate({ body: UpdateProfileRequest }), async (req, res) => {
   const user = await updateUser(req.user, req.body);
   res.json({ user: toUserOut(user) });
 });
+
+// Each user's own Groq key (never returned, only its last four characters).
+router.get('/me/groq-key', (req, res) => res.json(groqKeyStatus(req.user)));
+router.put('/me/groq-key', validate({ body: GroqKeyRequest }), async (req, res) => {
+  res.json(await saveGroqKey(req.user, req.body.key));
+});
+router.delete('/me/groq-key', async (req, res) => res.json(await removeGroqKey(req.user)));
 
 // Final step of the onboarding flow.
 router.post('/me/onboarding', validate({ body: OnboardingRequest }), async (req, res) => {

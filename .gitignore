@@ -34,3 +34,5 @@ backend/coverage/
 # Installer output and the compiled native helper (built on `npm install`)
 desktop/dist/
 desktop/helper/bin/
+# Copy of frontend/dist bundled into the installer (npm run build:hub)
+desktop/hub/

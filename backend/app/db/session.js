@@ -19,6 +19,7 @@ export const sequelize = new Sequelize(settings.DATABASE_URL, {
     updatedAt: 'updated_at',
   },
   pool: { max: 10, min: 0, idle: 10_000, acquire: 30_000 },
+  dialectOptions: settings.DATABASE_SSL ? { ssl: { require: true, rejectUnauthorized: true } } : {},
 });
 
 export async function checkConnection() {

@@ -15,6 +15,8 @@ const FRONTEND_DIST = path.resolve(BACKEND_ROOT, '..', 'frontend', 'dist');
 
 export function createApp() {
   const app = express();
+  // Behind Render (or any reverse proxy) the visitor IP comes from X-Forwarded-For.
+  if (settings.TRUST_PROXY > 0) app.set('trust proxy', settings.TRUST_PROXY);
   app.disable('x-powered-by');
 
   // Server-side duration of every request, as a header and a log line.

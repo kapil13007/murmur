@@ -12,7 +12,8 @@
     "build:helper": "node helper/build.js",
     "icons": "node scripts/make-icons.js",
     "postinstall": "node helper/build.js",
-    "dist": "npm run build:helper && electron-builder --win"
+    "dist": "npm run build:hub && npm run build:helper && electron-builder --win",
+    "build:hub": "node scripts/build-hub.js"
   },
   "build": {
     "appId": "com.prem.murmur",
@@ -25,12 +26,17 @@
       "preload/**",
       "renderer/**",
       "assets/**",
-      "package.json"
+      "package.json",
+      "murmur.config.json"
     ],
     "extraResources": [
       {
         "from": "helper/bin/MurmurHelper.exe",
         "to": "MurmurHelper.exe"
+      },
+      {
+        "from": "hub",
+        "to": "hub"
       }
     ],
     "win": {

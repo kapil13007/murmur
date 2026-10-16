@@ -22,6 +22,7 @@ export const unauthorized = (detail = 'Could not validate credentials', opts) =>
 export const forbidden = (detail = 'You do not have access to this resource', opts) => new HttpError(403, detail, opts);
 export const notFound = (detail = 'Not found', opts) => new HttpError(404, detail, opts);
 export const conflict = (detail, opts) => new HttpError(409, detail, opts);
+export const preconditionRequired = (detail, opts) => new HttpError(428, detail, opts);
 export const unprocessable = (detail, opts) => new HttpError(422, detail, opts);
 export const serviceUnavailable = (detail, opts) => new HttpError(503, detail, opts);
 

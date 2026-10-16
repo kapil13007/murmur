@@ -1,6 +1,7 @@
 // File: app/services/llm/openai_compatible_provider.js
 // OpenAI and Groq chat completions share one request/response shape.
 import { settings } from '../../core/config.js';
+import { requireGroqKey } from '../../core/request_context.js';
 import { LlmError } from './errors.js';
 
 const PROVIDERS = {
@@ -11,7 +12,7 @@ const PROVIDERS = {
   },
   groq: {
     url: 'https://api.groq.com/openai/v1/chat/completions',
-    key: () => settings.GROQ_API_KEY,
+    key: () => requireGroqKey(),
     model: () => settings.GROQ_LLM_MODEL,
   },
 };

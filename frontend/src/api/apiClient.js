@@ -82,6 +82,8 @@ export const logoutEverywhere = () => data(apiClient.post('/auth/logout-all'));
 
 // --- Account ---
 export const getMe = () => data(apiClient.get('/users/me'));
+export const saveGroqKey = (key) => data(apiClient.put('/users/me/groq-key', { key }));
+export const removeGroqKey = () => data(apiClient.delete('/users/me/groq-key'));
 export const updateProfile = (payload) => data(apiClient.patch('/users/me', payload));
 export const completeOnboarding = (payload) => data(apiClient.post('/users/me/onboarding', payload));
 export const restartOnboarding = () => data(apiClient.post('/users/me/onboarding/reset'));

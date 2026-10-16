@@ -24,6 +24,8 @@ export const OnboardingRequest = z.object({
   timezone: z.string().max(64).optional(),
 });
 
+export const GroqKeyRequest = z.object({ key: z.string().min(1, 'Paste your Groq API key').max(300) });
+
 export const DeleteAccountRequest = z.object({
   password: z.string().min(1, 'Password is required'),
 });

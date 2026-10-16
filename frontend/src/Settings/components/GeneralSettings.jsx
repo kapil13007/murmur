@@ -4,12 +4,13 @@ import { useApp } from '../../context/AppContext';
 import { describeLanguages } from '../../utils/languages';
 import KeyCombo from '../../components/ui/KeyCombo';
 import LanguagesDialog from './LanguagesDialog';
+import GroqKeyDialog from './GroqKeyDialog';
 import MicrophoneDialog from './MicrophoneDialog';
 import SettingRow, { SettingSection } from './SettingRow';
 import ShortcutsDialog from './ShortcutsDialog';
 
 export default function GeneralSettings() {
-  const { preferences: prefs, savePreferences } = useApp();
+  const { preferences: prefs, savePreferences, groqKey } = useApp();
   const [dialog, setDialog] = useState(null);
   if (!prefs) return null;
 
@@ -40,6 +41,21 @@ export default function GeneralSettings() {
         </SettingRow>
       </SettingSection>
 
+      <SettingSection title="AI">
+        <SettingRow
+          label="Groq API key"
+          description={
+            groqKey?.has_key
+              ? `Connected (ends in ${groqKey.last4}). Powers speech recognition and cleanup.`
+              : 'Needed for dictation. Free from console.groq.com.'
+          }
+        >
+          <button className={groqKey?.has_key ? 'btn-secondary px-3 py-1.5' : 'btn-primary px-3 py-1.5'} onClick={() => setDialog('groq')}>
+            {groqKey?.has_key ? 'Change' : 'Add key'}
+          </button>
+        </SettingRow>
+      </SettingSection>
+
       <SettingSection title="Appearance">
         <SettingRow label="Theme" description="Light, dark, or follow your system.">
           <select className="input w-36 py-1.5" value={prefs.theme} onChange={(e) => savePreferences({ theme: e.target.value })}>
@@ -60,6 +76,7 @@ export default function GeneralSettings() {
 
       {dialog === 'shortcuts' && <ShortcutsDialog onClose={() => setDialog(null)} />}
       {dialog === 'microphone' && <MicrophoneDialog onClose={() => setDialog(null)} />}
+      {dialog === 'groq' && <GroqKeyDialog onClose={() => setDialog(null)} />}
       {dialog === 'languages' && <LanguagesDialog onClose={() => setDialog(null)} />}
     </div>
   );

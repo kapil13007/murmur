@@ -3,6 +3,10 @@
 // dictation controller, keeps the session in step with the hub, and applies
 // the user's desktop preferences (Murmur bar, sounds, taskbar, start at login).
 const { app, globalShortcut, ipcMain, Notification, session } = require('electron');
+const { registerScheme, serveHub } = require('./protocol');
+
+// Before the app is ready: the bundled hub is served from murmur://app.
+registerScheme();
 
 if (!app.requestSingleInstanceLock()) {
   app.quit();
@@ -190,11 +194,11 @@ if (!app.requestSingleInstanceLock()) {
 
   app.whenReady().then(() => {
     app.setAppUserModelId('com.prem.murmur');
+    if (config.hasBundledHub) serveHub();
 
     // Microphone for the Murmur bar recorder (file://) and the hub's in-page
     // dictation; clipboard writes for the hub's copy buttons. Nothing else.
-    const hubOrigin = new URL(config.HUB_URL).origin;
-    const trusted = (url) => url.startsWith('file://') || url.startsWith(`${hubOrigin}/`) || url === hubOrigin;
+    const trusted = (url) => url.startsWith('file://') || config.originOf(url) === config.HUB_ORIGIN;
     const ALLOWED = new Set(['media', 'clipboard-sanitized-write']);
     session.defaultSession.setPermissionRequestHandler((webContents, permission, callback, details) => {
       const mediaOk = permission !== 'media' || (details.mediaTypes || []).every((t) => t === 'audio');
@@ -212,7 +216,7 @@ if (!app.requestSingleInstanceLock()) {
       updatePreferences,
       quit: () => app.quit(),
     });
-    dictation.showHub = () => openHub();
+    dictation.showHub = (route) => openHub(route);
 
     let recording = false;
     bar.onStateChange(() => {

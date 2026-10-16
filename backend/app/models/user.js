@@ -27,6 +27,8 @@ export function initUser(sequelize) {
       first_name: { type: DataTypes.STRING(100), allowNull: false },
       last_name: { type: DataTypes.STRING(100), allowNull: true },
       avatar_url: { type: DataTypes.TEXT, allowNull: true },
+      groq_key_encrypted: { type: DataTypes.TEXT, allowNull: true },
+      groq_key_last4: { type: DataTypes.STRING(4), allowNull: true },
       product_intent: { type: DataTypes.STRING(30), allowNull: true },
       onboarding_completed: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
       onboarding_completed_at: { type: DataTypes.DATE, allowNull: true },

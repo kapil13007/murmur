@@ -3,7 +3,7 @@
 // at the bottom of the screen that shows recording state).
 const path = require('node:path');
 const { BrowserWindow, screen, shell } = require('electron');
-const { HUB_URL, ROOT } = require('./config');
+const { HUB_ORIGIN, HUB_URL, ROOT, originOf } = require('./config');
 
 let hub = null;
 let bar = null;
@@ -13,13 +13,7 @@ function markQuitting() {
   quitting = true;
 }
 
-const sameOrigin = (url) => {
-  try {
-    return new URL(url).origin === new URL(HUB_URL).origin;
-  } catch {
-    return false;
-  }
-};
+const sameOrigin = (url) => originOf(url) === HUB_ORIGIN;
 
 function createHub({ show = true } = {}) {
   if (hub && !hub.isDestroyed()) {

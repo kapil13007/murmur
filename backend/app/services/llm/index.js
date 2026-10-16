@@ -2,12 +2,15 @@
 // Provider-agnostic text completion used by AI formatting, Command Mode and
 // Transforms. Callers own the offline fallback when this throws.
 import { settings } from '../../core/config.js';
+import { groqKey } from '../../core/request_context.js';
 import { completeWithAnthropic } from './anthropic_provider.js';
 import { completeWithOpenAICompatible } from './openai_compatible_provider.js';
 import { LlmUnavailableError } from './errors.js';
 
 export function isLlmEnabled() {
-  return settings.LLM_PROVIDER !== 'none';
+  if (settings.LLM_PROVIDER === 'none') return false;
+  // Groq needs a key: the user's own, or the server's when self-hosted.
+  return settings.LLM_PROVIDER !== 'groq' || Boolean(groqKey());
 }
 
 export function llmStatus() {

@@ -262,7 +262,9 @@ class DictationController {
       if (err.name === 'AbortError') return; // cancelled with Esc
       this.reset();
       this.sound('error');
-      this.flash('error', err.message || 'Something went wrong', 4000);
+      this.flash('error', err.message || 'Something went wrong', 5000);
+      // No Groq key yet, or Groq rejected it: take the user to where it's set.
+      if (String(err.body?.code || '').startsWith('groq_key')) this.showHub('/settings/general');
     }
   }
 

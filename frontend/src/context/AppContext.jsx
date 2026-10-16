@@ -17,6 +17,8 @@ export function AppProvider({ children }) {
   const [user, setUser] = useState(null);
   const [preferences, setPreferences] = useState(null);
   const [unread, setUnread] = useState(0);
+  // { has_key, last4, required }: the user's own Groq key (see GroqKeyDialog).
+  const [groqKey, setGroqKey] = useState(null);
   // Only signed-in visitors need to wait for /users/me.
   const [loading, setLoading] = useState(() => Boolean(api.getToken()));
 
@@ -25,6 +27,7 @@ export function AppProvider({ children }) {
       Promise.all([api.getMe(), api.getPreferences()]).then(([me, prefs]) => {
         setUser(me.user);
         setUnread(me.unread_notifications);
+        setGroqKey(me.groq_key);
         setPreferences(prefs);
         return me;
       }),
@@ -88,11 +91,13 @@ export function AppProvider({ children }) {
       savePreferences,
       unread,
       setUnread,
+      groqKey,
+      setGroqKey,
       loading,
       refresh,
       isDesktop: Boolean(desktop),
     }),
-    [user, preferences, savePreferences, unread, loading, refresh],
+    [user, preferences, savePreferences, unread, groqKey, loading, refresh],
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

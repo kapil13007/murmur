@@ -3,6 +3,8 @@
 import multer from 'multer';
 import { getUserById } from '../crud/user_crud.js';
 import { unauthorized } from './errors.js';
+import { runWithUserKey } from './request_context.js';
+import { decryptSecret } from './secrets.js';
 import { decodeAccessToken } from './security.js';
 
 // Resolves the bearer token to `req.user` or answers 401. Tokens issued
@@ -20,7 +22,8 @@ export async function getCurrentActiveUser(req, res, next) {
   const user = await getUserById(payload.sub);
   if (!user || payload.ver !== user.token_version) return next(unauthorized());
   req.user = user;
-  return next();
+  // Everything below this middleware sees the user's own Groq key.
+  return runWithUserKey(decryptSecret(user.groq_key_encrypted), () => next());
 }
 
 // Audio uploads are kept in memory: dictations are small (16 kHz mono WAV is

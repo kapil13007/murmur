@@ -2,11 +2,12 @@
 // Groq and OpenAI expose the same `/audio/transcriptions` endpoint shape, so
 // one client covers both.
 import { settings } from '../../core/config.js';
+import { requireGroqKey } from '../../core/request_context.js';
 
 const PROVIDERS = {
   groq: {
     url: 'https://api.groq.com/openai/v1/audio/transcriptions',
-    key: () => settings.GROQ_API_KEY,
+    key: () => requireGroqKey(),
     model: () => settings.GROQ_ASR_MODEL,
   },
   openai: {
