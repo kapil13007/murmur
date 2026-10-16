@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Privacy · Murmur</title>
+    <meta name="description" content="How Murmur handles your voice, text and account data." />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="navcard">
+      <a class="brand" href="index.html"><img src="logo.svg" alt="" width="28" height="28" />Murmur</a>
+      <nav aria-label="Main"><a href="index.html">Home</a><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a></nav>
+    </header>
+    <main class="wrap legal">
+      <h1>Privacy</h1>
+      <p class="updated">Last updated: October 2026</p>
+      <p>Murmur turns your voice into text. That means it handles sensitive things, so this page says plainly what is collected, where it goes and how you can remove it. Murmur is an independent project run by one person, not a company.</p>
+
+      <h2>What Murmur collects</h2>
+      <ul>
+        <li><b>Your account:</b> your name, email address and a one-way hash of your password (never the password itself).</li>
+        <li><b>Your dictations:</b> the audio you record while holding the shortcut, and the text that comes back.</li>
+        <li><b>Where you were typing</b> (only when “Context awareness” is on in Settings): the app name, the window title, the address of the browser tab and the name of the text box, such as “Subject”. It is used to choose a tone and format, for example no full stop in a subject line.</li>
+        <li><b>Your personalisation:</b> dictionary words, snippets, style choices and settings.</li>
+        <li><b>Your Groq API key,</b> which you provide. It is stored encrypted (AES-256-GCM) and only its last four characters are ever shown back.</li>
+      </ul>
+      <p>Murmur also reads the two characters just before your cursor, on your own computer, to decide whether to add a space. They are never sent anywhere.</p>
+
+      <h2>Where your data goes</h2>
+      <ul>
+        <li><b>Murmur’s server</b> (hosted on Render, in Singapore) receives your audio over HTTPS.</li>
+        <li><b>Groq</b> receives your audio and the transcript to convert it to text and clean it up, using <i>your own</i> Groq key. Groq’s privacy policy and terms apply to that part, and the usage is billed to your Groq account.</li>
+        <li><b>The database</b> (hosted on Neon, in Singapore) stores your account, transcripts, dictionary and settings.</li>
+        <li><b>GitHub</b> hosts the downloadable installer.</li>
+      </ul>
+      <p>Murmur does not sell your data, show ads, or use your recordings to train anything. This website sets no cookies and loads no analytics or third-party scripts.</p>
+
+      <h2>How long it is kept</h2>
+      <ul>
+        <li><b>Recordings</b> are kept for up to 14 days so you can retry a transcript, then deleted automatically. With <b>Privacy Mode</b> on, recordings are never kept.</li>
+        <li><b>Transcript text</b> stays in your history until you delete it. You can choose “Delete after 24 hours” or “Never store” in Settings.</li>
+        <li><b>Everything else</b> stays until you delete it or delete your account.</li>
+      </ul>
+
+      <h2>Your controls</h2>
+      <ul>
+        <li>Download all your data as a file: Settings, then Data and Privacy.</li>
+        <li>Delete your history at any time, or delete your whole account, which removes all of it from the database.</li>
+        <li>Remove your Groq key at any time in Settings.</li>
+        <li>Turn off Context awareness to stop the app, window and text box names being sent.</li>
+      </ul>
+
+      <h2>Security</h2>
+      <p>Traffic uses HTTPS. Passwords are hashed with bcrypt. Accounts lock for 15 minutes after five wrong passwords. The code is open source, so you can read exactly what it does. No system is perfectly secure, so don’t dictate things you would not be comfortable sending to a cloud service.</p>
+
+      <h2>Questions</h2>
+      <p>Open an issue on the <a href="https://github.com/kapil13007/murmur">GitHub project</a>, or ask for your data to be deleted there.</p>
+
+    </main>
+    <footer>
+      <div class="wrap"><div class="legal-line">© <span id="year">2026</span> Murmur. An independent project, not affiliated with Wispr, Inc. · <a href="index.html">Home</a></div></div>
+    </footer>
+    <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+  </body>
+</html>

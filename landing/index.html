@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Murmur: voice dictation for Windows</title>
+    <meta name="description" content="Hold a key, speak, let go. Murmur types clean, punctuated text into any app on Windows. Free." />
+    <meta property="og:title" content="Murmur: voice dictation for Windows" />
+    <meta property="og:description" content="Hold a key, speak, let go. Clean text appears wherever your cursor is." />
+    <meta property="og:type" content="website" />
+    <meta name="theme-color" content="#034f46" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="preload" href="fonts/eb-garamond-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="fonts/figtree-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="announce">
+      Murmur 1.0 is out for Windows.
+      <a href="https://github.com/kapil13007/murmur/releases/latest/download/Murmur-Setup.exe">Download free ›</a>
+    </div>
+
+    <header class="navcard">
+      <a class="brand" href="#top"><img src="logo.svg" alt="" width="28" height="28" />Murmur</a>
+      <nav aria-label="Main">
+        <a href="#how">How it works</a>
+        <a href="#features">Features</a>
+        <a href="#free">Free</a>
+        <a href="#faq">FAQ</a>
+        <a class="btn" href="https://github.com/kapil13007/murmur/releases/latest/download/Murmur-Setup.exe">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5.5 10.5 4.4v7H3v-5.9Zm8.6-1.2L21 3v8.4h-9.4V4.3ZM3 12.6h7.5v7L3 18.5v-5.9Zm8.6 0H21V21l-9.4-1.3v-7.1Z" /></svg>
+          Download
+        </a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <div class="stage" aria-hidden="true">
+          <svg class="swirl" viewBox="0 0 620 520">
+            <defs><path id="swirlPath" d="M -30 392 C 150 400 300 400 395 330 C 480 268 470 150 375 108 C 285 70 190 118 205 215 C 218 295 320 330 440 350 C 520 363 580 380 660 420" fill="none" /></defs>
+            <text><textPath href="#swirlPath">um so I think we should meet on Tuesday, no wait, Wednesday at four to go over the report and then send it to Sarah before lunch, can you check that the notes were saved</textPath></text>
+          </svg>
+          <div class="ribbon"><span>I think we should meet on Wednesday at 4 PM to go over the report, and send it to Sarah before lunch. Can you check that the notes were saved?</span></div>
+          <div class="toast"><svg viewBox="0 0 24 24"><path d="m5 12.500 4.500 4.500L19 7.500" /></svg>Added to dictionary</div>
+          <div class="pill"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        </div>
+
+        <div class="wrap" style="position: relative">
+          <div class="eyebrow">Voice dictation for Windows</div>
+          <h1>Speak anywhere.<br /><em>Murmur types.</em></h1>
+          <p class="lead">Hold a key, talk, let go. Clean, punctuated text lands wherever your cursor is.</p>
+          <a class="btn big" href="https://github.com/kapil13007/murmur/releases/latest/download/Murmur-Setup.exe">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5.5 10.5 4.4v7H3v-5.9Zm8.6-1.2L21 3v8.4h-9.4V4.3ZM3 12.6h7.5v7L3 18.5v-5.9Zm8.6 0H21V21l-9.4-1.3v-7.1Z" /></svg>
+            Download for Windows
+          </a>
+          <p class="note">Free · Windows 10 and 11 · Version 1.0</p>
+        </div>
+      </section>
+
+      <section class="night" aria-label="Works in your apps">
+        <div class="wrap">
+          <div class="eyebrow">Works anywhere you can paste</div>
+          <div class="apps"><span>Gmail</span><span>Slack</span><span>Word</span><span>VS Code</span><span>Notion</span><span>Chrome</span><span>Notepad</span></div>
+        </div>
+      </section>
+
+      <section class="deep" aria-labelledby="speed">
+        <div class="wrap">
+          <h2 id="speed">Talk <em>faster than you type.</em></h2>
+          <p class="sub">Most people type around 40 words a minute and speak around 150. Murmur turns that speed into finished writing, not a messy transcript.</p>
+          <div class="race">
+            <div class="lane slow"><small>Typing</small><strong>~40 wpm</strong></div>
+            <div class="lane fast"><small>Speaking with Murmur</small><strong>~150 wpm</strong><p>“Sounds good. Can you send me the draft by Friday and loop in Sarah?”</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="pad how" id="how">
+        <div class="wrap">
+          <div class="eyebrow">How it works</div>
+          <h2>Three steps, no window to open.</h2>
+          <div class="steps">
+            <div class="step"><div class="n">1</div><h3>Hold</h3><p>Press and hold <kbd>Ctrl</kbd> + <kbd>Win</kbd> in any app. A small bar at the bottom of your screen shows that Murmur is listening.</p></div>
+            <div class="step"><div class="n">2</div><h3>Speak</h3><p>Talk naturally. Say “um”, change your mind, spell out an email address. Murmur sorts it out.</p></div>
+            <div class="step"><div class="n">3</div><h3>Release</h3><p>Let go and the finished text is pasted at your cursor within a second or two. Your clipboard is left exactly as it was.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="pad" id="features">
+        <div class="wrap">
+          <div class="eyebrow">What it does</div>
+          <h2>Dictation that reads like <em>you</em> wrote it.</h2>
+          <div class="features">
+            <div class="feature"><div class="ic"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h10M4 17h16" /></svg></div><h3>Cleans up as you speak</h3><p>Removes “um” and “uh”, applies self-corrections (“3pm, actually 4pm”), adds punctuation and builds lists.</p></div>
+            <div class="feature"><div class="ic"><svg viewBox="0 0 24 24"><path d="M4 6h16v12H4zM4 7l8 6 8-6" /></svg></div><h3>Knows where you’re typing</h3><p>Email addresses come out as <code>name@gmail.com</code>. Subject lines get no full stop. The To box gets only addresses. Chat is casual, email is formal.</p></div>
+            <div class="feature"><div class="ic"><svg viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5zM9 12h6M9 16h6" /></svg></div><h3>Your words, spelled right</h3><p>Teach it names and jargon in your dictionary, and it learns from your corrections. Say “my calendar link” to paste the whole thing.</p></div>
+            <div class="feature"><div class="ic"><svg viewBox="0 0 24 24"><path d="M12 3v12M8 7v4M16 7v4M4 10v2M20 10v2M7 19h10" /></svg></div><h3>Fast</h3><p>Powered by Whisper large-v3-turbo on Groq. Text is usually in your document a second or two after you let go.</p></div>
+            <div class="feature"><div class="ic"><svg viewBox="0 0 24 24"><path d="m5 19 4-1L19 8l-3-3L6 15zM14 7l3 3" /></svg></div><h3>Command Mode</h3><p>Select text, hold the command shortcut and say “make this more formal” or “turn this into bullet points”.</p></div>
+            <div class="feature"><div class="ic"><svg viewBox="0 0 24 24"><path d="M12 3 5 6v5c0 4.500 3 8 7 10 4-2 7-5.500 7-10V6zM9.500 12l2 2 3.500-4" /></svg></div><h3>Private by design</h3><p>Privacy Mode keeps no recordings. You can auto-delete history after 24 hours, export everything, or delete your account. Your Groq key is encrypted.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="pad how" id="free">
+        <div class="wrap free">
+          <div>
+            <div class="eyebrow">Free, with your own key</div>
+            <h2>No subscription. Bring a <em>free</em> Groq key.</h2>
+            <p class="lead2">Murmur uses Groq for fast speech recognition. Instead of charging you, it uses your own free Groq account, so you pay nothing to Murmur and your usage stays between you and Groq. Setup takes about a minute.</p>
+          </div>
+          <ol>
+            <li><span><b>Install Murmur</b> and create your account.</span></li>
+            <li><span>Open <b>console.groq.com/keys</b>, sign in (no card needed) and create a key.</span></li>
+            <li><span><b>Paste it into Murmur</b> under Settings, then hold <kbd>Ctrl</kbd> + <kbd>Win</kbd> and talk.</span></li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="pad" id="faq">
+        <div class="wrap">
+          <div class="eyebrow">Questions</div>
+          <h2>Good to <em>know.</em></h2>
+          <div class="faq">
+            <details><summary>Is it really free?</summary><p>Yes. Murmur doesn’t charge anything. You use your own Groq account, which has a generous free tier that comfortably covers everyday dictation.</p></details>
+            <details><summary>Windows says “unknown publisher”. Is it safe?</summary><p>Murmur isn’t code-signed yet, because a signing certificate costs money. Windows shows a SmartScreen warning for any unsigned app. Click <b>More info</b>, then <b>Run anyway</b>. The full source code is on GitHub if you want to check it.</p></details>
+            <details><summary>Where does my voice go?</summary><p>Audio is sent to the Murmur server, which forwards it to Groq using your key and returns the text. Recordings are kept for up to 14 days so you can retry a transcript, unless you turn on Privacy Mode, in which case none are kept. Read the <a href="privacy.html">privacy policy</a> for the details.</p></details>
+            <details><summary>Does it work on Mac, Linux or my phone?</summary><p>Not yet. Murmur is for Windows 10 and 11 only.</p></details>
+            <details><summary>Which apps does it work in?</summary><p>Anywhere you can paste text: browsers, Gmail, Slack, Word, VS Code, Notepad and more. A few apps that block pasting, or run as administrator, may not accept it.</p></details>
+            <details><summary>Can I change the shortcut?</summary><p>Yes. Settings lets you set your own keys for dictating, hands-free mode, Command Mode and pasting your last transcript.</p></details>
+          </div>
+        </div>
+      </section>
+
+      <section class="final">
+        <div class="wrap">
+          <h2>Stop typing. <em>Start talking.</em></h2>
+          <a class="btn big light" href="https://github.com/kapil13007/murmur/releases/latest/download/Murmur-Setup.exe">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5.5 10.5 4.4v7H3v-5.9Zm8.6-1.2L21 3v8.4h-9.4V4.3ZM3 12.6h7.5v7L3 18.5v-5.9Zm8.6 0H21V21l-9.4-1.3v-7.1Z" /></svg>
+            Download for Windows
+          </a>
+          <p class="note">Free · Windows 10 and 11 · Version 1.0</p>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="wrap">
+        <div class="cols">
+          <div>
+            <a class="brand" href="#top"><img src="logo.svg" alt="" width="28" height="28" />Murmur</a>
+            <p>Voice dictation for Windows. Hold a key, speak, let go.</p>
+          </div>
+          <div><h4>Product</h4><ul><li><a href="#how">How it works</a></li><li><a href="#features">Features</a></li><li><a href="#free">Pricing</a></li><li><a href="#faq">FAQ</a></li></ul></div>
+          <div><h4>Get it</h4><ul><li><a href="https://github.com/kapil13007/murmur/releases/latest/download/Murmur-Setup.exe">Download for Windows</a></li><li><a href="https://github.com/kapil13007/murmur/releases">All releases</a></li></ul></div>
+          <div><h4>Project</h4><ul><li><a href="privacy.html">Privacy</a></li><li><a href="terms.html">Terms</a></li><li><a href="https://github.com/kapil13007/murmur">GitHub</a></li></ul></div>
+        </div>
+        <div class="legal-line">© <span id="year">2026</span> Murmur. An independent project, not affiliated with Wispr, Inc.</div>
+      </div>
+    </footer>
+    <script>
+      document.getElementById('year').textContent = new Date().getFullYear();
+    </script>
+  </body>
+</html>
