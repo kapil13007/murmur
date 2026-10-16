@@ -7,6 +7,7 @@ import { formatAddressField } from '../app/services/formatting/addresses.js';
 import { finalizeText } from '../app/services/formatting/index.js';
 import { classifyField } from '../app/services/app_category_service.js';
 import { cleanAsrText } from '../app/services/asr/index.js';
+import { needsLanguageRetry, toIsoLanguage } from '../app/services/asr/languages.js';
 
 const fmt = (text, opts = {}) => applyRules(text, { cleanupLevel: 'light', style: 'formal', ...opts });
 
@@ -185,4 +186,20 @@ test('focused field names map to field types', () => {
   assert.equal(classifyField('Address and search bar'), 'short');
   assert.equal(classifyField('Message Body'), 'text');
   assert.equal(classifyField(null), 'text');
+});
+
+// --- Language guard ---------------------------------------------------------
+test('a guess outside the languages the user speaks triggers a re-run', () => {
+  const allowed = ['en', 'ta'];
+  // Whisper reports languages by name: "icelandic" for a short English name.
+  assert.equal(needsLanguageRetry({ allowedLanguages: allowed, detectedLanguage: 'icelandic' }), true);
+  assert.equal(needsLanguageRetry({ allowedLanguages: allowed, detectedLanguage: 'english' }), false);
+  assert.equal(needsLanguageRetry({ allowedLanguages: allowed, detectedLanguage: 'tamil' }), false);
+  // One language is forced up front, none means "any language".
+  assert.equal(needsLanguageRetry({ language: 'en', allowedLanguages: allowed, detectedLanguage: 'icelandic' }), false);
+  assert.equal(needsLanguageRetry({ allowedLanguages: ['en'], detectedLanguage: 'icelandic' }), false);
+  assert.equal(needsLanguageRetry({ allowedLanguages: [], detectedLanguage: 'icelandic' }), false);
+  assert.equal(needsLanguageRetry({ allowedLanguages: allowed, detectedLanguage: null }), false);
+  assert.equal(toIsoLanguage('Icelandic'), 'is');
+  assert.equal(toIsoLanguage('en'), 'en');
 });

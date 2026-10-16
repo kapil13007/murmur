@@ -149,6 +149,7 @@ export async function processDictation(user, file, meta) {
     samples: audio.samples,
     wav: audio.wav,
     language,
+    allowedLanguages: prefs.selected_languages,
     vocabulary: vocabularyHints(ctx),
     speechSeconds: audio.analysis.speechSeconds,
   });
@@ -222,6 +223,7 @@ export async function retryTranscript(user, transcript) {
     samples: audio.samples,
     wav: audio.wav,
     language: transcript.language,
+    allowedLanguages: prefs.selected_languages,
     vocabulary: vocabularyHints(ctx),
     speechSeconds: audio.analysis.speechSeconds,
   });

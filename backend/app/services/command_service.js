@@ -30,6 +30,7 @@ export async function runCommand(user, file, meta) {
       samples: audio.samples,
       wav: audio.wav,
       language,
+      allowedLanguages: prefs.selected_languages,
       speechSeconds: audio.analysis.speechSeconds,
     });
     instruction = applyRules(asr.text, { cleanupLevel: 'light', style: 'formal', smartFormatting: false });

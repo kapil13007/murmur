@@ -6,6 +6,7 @@ import { settings } from '../../core/config.js';
 import { HttpError, preconditionRequired } from '../../core/errors.js';
 import { getLogger } from '../../core/logger.js';
 import { isLocalWhisperReady, transcribeLocal, warmUpLocalWhisper } from './local_whisper.js';
+import { needsLanguageRetry } from './languages.js';
 import { transcribeRemote } from './remote_whisper.js';
 
 const logger = getLogger('asr');
@@ -57,7 +58,7 @@ export function vocabularyPrompt(words) {
   return unique.length ? `${unique.join(', ')}.` : undefined;
 }
 
-export async function transcribe({ samples, wav, language, vocabulary = [], speechSeconds = Infinity }) {
+export async function transcribe({ samples, wav, language, allowedLanguages = [], vocabulary = [], speechSeconds = Infinity }) {
   const started = Date.now();
   const provider = settings.ASR_PROVIDER;
   let result;
@@ -66,7 +67,15 @@ export async function transcribe({ samples, wav, language, vocabulary = [], spee
     result = await transcribeLocal(samples, { language });
   } else {
     try {
-      result = await transcribeRemote(provider, wav, { language, prompt: vocabularyPrompt(vocabulary) });
+      const prompt = vocabularyPrompt(vocabulary);
+      result = await transcribeRemote(provider, wav, { language, prompt });
+      // With several languages selected Whisper guesses, and short clips (a
+      // name in a To box) can come back as the wrong language entirely. If it
+      // picked one the user doesn't speak, run it again in their first language.
+      if (needsLanguageRetry({ language, allowedLanguages, detectedLanguage: result.detectedLanguage })) {
+        logger.info(`Detected ${result.detectedLanguage}, outside ${allowedLanguages.join('/')}; retrying as ${allowedLanguages[0]}`);
+        result = await transcribeRemote(provider, wav, { language: allowedLanguages[0], prompt });
+      }
     } catch (err) {
       if (err instanceof HttpError) throw err; // e.g. no Groq key yet
       // Public servers have no local Whisper and don't hide a bad key: say so.

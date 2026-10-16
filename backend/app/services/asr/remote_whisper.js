@@ -3,6 +3,7 @@
 // one client covers both.
 import { settings } from '../../core/config.js';
 import { requireGroqKey } from '../../core/request_context.js';
+import { toIsoLanguage } from './languages.js';
 
 const PROVIDERS = {
   groq: {
@@ -58,19 +59,4 @@ export async function transcribeRemote(provider, wav, { language, prompt, timeou
     model,
     detectedLanguage: toIsoLanguage(data.language) || language || null,
   };
-}
-
-// verbose_json reports languages by name ("english"); store ISO codes.
-const LANGUAGE_NAMES = {
-  english: 'en', tamil: 'ta', hindi: 'hi', spanish: 'es', french: 'fr', german: 'de', italian: 'it',
-  portuguese: 'pt', dutch: 'nl', russian: 'ru', japanese: 'ja', korean: 'ko', chinese: 'zh', arabic: 'ar',
-  telugu: 'te', kannada: 'kn', malayalam: 'ml', marathi: 'mr', bengali: 'bn', gujarati: 'gu', urdu: 'ur',
-  turkish: 'tr', polish: 'pl', ukrainian: 'uk', vietnamese: 'vi', indonesian: 'id', swedish: 'sv',
-};
-
-function toIsoLanguage(lang) {
-  if (!lang) return null;
-  const l = String(lang).toLowerCase();
-  if (l.length <= 3) return l;
-  return LANGUAGE_NAMES[l] || null;
 }
