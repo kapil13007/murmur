@@ -2,6 +2,8 @@
 
 Murmur is a personal voice dictation app. Hold a shortcut in any Windows app, speak, let go, and clean, formatted text is typed where your cursor is. A hub app keeps your history, personal dictionary, snippets, writing styles and transforms in sync through a real API and database.
 
+**[Download for Windows](https://github.com/kapil13007/murmur/releases/latest/download/Murmur-Setup.exe)** · [Website](https://murmur-site.onrender.com) · Free: bring your own [Groq key](https://console.groq.com/keys)
+
 > Independent personal project inspired by Wispr Flow. Not affiliated with or endorsed by Wispr, Inc., and no Wispr code or assets are included.
 
 ## Core Features
